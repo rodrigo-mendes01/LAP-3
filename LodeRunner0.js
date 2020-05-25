@@ -106,7 +106,7 @@ class GameFactory {
 
 const WORLD_WIDTH = 28;
 const WORLD_HEIGHT = 16;
-
+//mudar o g. para tt
 const MAPS = Object.freeze([
 [
 	"..................E.........",
@@ -122,7 +122,7 @@ const MAPS = Object.freeze([
 	"tttttttttetttttttttte.......",
 	".........e..........e.......",
 	".......o.ecccccccccce...o...",
-	"....etttttt.........ttttttte",
+	"....etttttt.........ttttt.te",
 	"....e.........h..o.........e",
 	"tttttttttttttttttttttttttttt"
 ], [
