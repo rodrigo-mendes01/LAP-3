@@ -69,8 +69,7 @@ class ActiveActor extends Actor {
     control.worldActive[this.x][this.y] = empty;
     control.world[this.x][this.y].draw(this.x, this.y);
   }
-  animation() {
-    var k = control.getKey();
+  animation(k) {
     switch (k) {
       case " ":
         shoot();
@@ -171,11 +170,12 @@ class Hero extends ActiveActor {
     hero = this;
   }
   animation() {
-    super.animation();
+    var k = control.getKey();
+    super.animation(k);
     //recolha do ouro
     if (control.world[this.x][this.y].imageName == "gold") {
       control.world[this.x][this.y].hide();
-      hero.show();
+      this.show();
     }
     if (isGoldCollected() && this.verification == 0) {
       this.verification = 1;
@@ -210,7 +210,8 @@ class Robot extends ActiveActor {
     this.dy = 0;
   }
   animation() {
-    robotMovement(hero, this);
+    var k = robotMovement(hero, this);
+    super.animation(k);
   }
 }
 
@@ -337,7 +338,6 @@ function goUp(actor) {
       if (actor instanceof Hero) actor.imageName = "hero_on_ladder_left";
       else actor.imageName = "robot_on_ladder_left";
     }
-    actor.y += -1;
     actor.move(0, -1);
   }
 }
@@ -402,41 +402,42 @@ function timeHandler(robo) {
 function robotMovement(heroActor, robotActor) {
   if (heroActor.y > robotActor.y) {
     if (canGoDown(robotActor)) {
-      goDown(robotActor);
+      return [0, 1];
     } else {
       if (heroActor.x > robotActor.x) {
         if (canGoRight(robotActor)) {
-          goRight(robotActor);
+          return [1, 0];
         }
       } else if (heroActor.x < robotActor.x) {
-        if (canGoLeft(robotActor)) goLeft(robotActor);
+        if (canGoLeft(robotActor)) return [-1, 0];
       }
     }
   } else {
     if (heroActor.y < robotActor.y) {
       if (canGoUp(robotActor)) {
-        goUp(robotActor);
+        return [0, -1];
       } else {
         if (heroActor.x > robotActor.x) {
           if (canGoRight(robotActor)) {
-            goRight(robotActor);
+            return [1, 0];
           }
         } else if (heroActor.x < robotActor.x) {
-          if (canGoLeft(robotActor)) goLeft(robotActor);
+          if (canGoLeft(robotActor)) return [-1, 0];
         }
       }
     } else {
       if (heroActor.y == robotActor.y) {
         if (heroActor.x > robotActor.x) {
           if (canGoRight(robotActor)) {
-            goRight(robotActor);
+            return [1, 0];
           }
         } else if (heroActor.x < robotActor.x) {
-          if (canGoLeft(robotActor)) goLeft(robotActor);
+          if (canGoLeft(robotActor)) return [-1, 0];
         }
       }
     }
   }
+  return null;
 }
 
 function canGoUp(actor) {
