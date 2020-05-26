@@ -444,11 +444,71 @@ function timeHandler(robo) {
   robo.y--;
   robo.show();
 }
-function closer(hero, robot) {
-  if (hero.x > robot.x) return [1, 0];
-  if (hero.x < robot.x) return [-1, 0];
-  if (hero.y > robot.y) return [0, 1];
-  if (hero.y < robot.y) return [0, -1];
+function robotMovement(heroActor, robotActor) {
+  if (heroActor.y > robotActor.y) {
+    if (canGoUp(robotActor)) {
+    }
+  }
+}
+function canGoUp(robot) {
+  if (
+    control.world[robot.x][robot.y].imageName == "ladder" &&
+    (control.world[robot.x][robot.y - 1] == empty ||
+      control.world[robot.x][robot.y - 1].imageName == "ladder" ||
+      control.world[robot.x][robot.y - 1].imageName == "rope")
+  )
+    return true;
+  return false;
+}
+function canGoDown(robot) {
+  if (
+    (control.world[this.x][this.y].imageName == "ladder" ||
+      control.world[this.x][this.y + 1].imageName == "ladder" ||
+      control.world[this.x][this.y].imageName == "rope" ||
+      control.world[this.x][this.y + 1].imageName == "chimney" ||
+      control.world[this.x][this.y + 1] == empty) &&
+    control.world[this.x][this.y + 1].imageName != "brick" &&
+    control.world[this.x][this.y + 1].imageName != "stone"
+  )
+    return true;
+  return false;
+}
+function canGoLeft(robot) {
+  if (
+    this.x + dx >= 0 &&
+    dx == -1 &&
+    control.world[this.x - 1][this.y].imageName != "brick" &&
+    control.world[this.x - 1][this.y].imageName != "stone" &&
+    (control.world[this.x][this.y + 1] != empty ||
+      control.world[this.x][this.y].imageName == "rope") &&
+    (control.world[this.x - 1][this.y + 1].imageName == "brick" ||
+      control.world[this.x - 1][this.y].imageName == "rope" ||
+      control.world[this.x - 1][this.y] == empty ||
+      control.world[this.x - 1][this.y].imageName == "ladder" ||
+      control.world[this.x - 1][this.y].imageName == "gold" ||
+      control.worldActive[this.x][this.y + 1] != empty)
+  )
+    return true;
+  return false;
+}
+function canGoRight(robot) {
+  if (
+    this.x + dx < WORLD_WIDTH &&
+    dx == 1 &&
+    control.world[this.x + 1][this.y].imageName != "brick" &&
+    control.world[this.x + 1][this.y].imageName != "stone" &&
+    (control.world[this.x][this.y + 1] != empty ||
+      control.world[this.x][this.y].imageName == "rope") &&
+    (control.world[this.x + 1][this.y + 1].imageName == "brick" ||
+      control.world[this.x + 1][this.y].imageName == "rope" ||
+      control.world[this.x + 1][this.y] == empty ||
+      control.world[this.x + 1][this.y].imageName == "ladder" ||
+      control.world[this.x + 1][this.y].imageName == "gold" ||
+      control.worldActive[this.x + 1][this.y + 1] != empty)
+  ) {
+    return true;
+  }
+  return false;
 }
 function sleep(milliseconds) {
   const date = Date.now();
