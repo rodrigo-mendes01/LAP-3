@@ -209,7 +209,9 @@ class Robot extends ActiveActor {
     this.dx = 1;
     this.dy = 0;
   }
-  animation() {}
+  animation() {
+    robotMovement(hero, this);
+  }
 }
 
 // GAME CONTROL
@@ -391,10 +393,10 @@ function goRight(actor) {
     if (control.world[actor.x + 1][actor.y].imageName == "rope") {
       if (actor.x % 2 == 0) {
         if (actor instanceof Hero) actor.imageName = "hero_on_rope_left";
-        actor.imageName = "robot_on_rope_left";
+        else actor.imageName = "robot_on_rope_left";
       } else {
         if (actor instanceof Hero) actor.imageName = "hero_on_rope_right";
-        actor.imageName = "robot_on_rope_right";
+        else actor.imageName = "robot_on_rope_right";
       }
     } else {
       if (actor instanceof Hero) actor.imageName = "hero_runs_right";
@@ -450,61 +452,61 @@ function robotMovement(heroActor, robotActor) {
     }
   }
 }
-function canGoUp(robot) {
+function canGoUp(actor) {
   if (
-    control.world[robot.x][robot.y].imageName == "ladder" &&
-    (control.world[robot.x][robot.y - 1] == empty ||
-      control.world[robot.x][robot.y - 1].imageName == "ladder" ||
-      control.world[robot.x][robot.y - 1].imageName == "rope")
+    control.world[actor.x][actor.y].imageName == "ladder" &&
+    (control.world[actor.x][actor.y - 1] == empty ||
+      control.world[actor.x][actor.y - 1].imageName == "ladder" ||
+      control.world[actor.x][actor.y - 1].imageName == "rope")
   )
     return true;
   return false;
 }
-function canGoDown(robot) {
+function canGoDown(actor) {
   if (
-    (control.world[this.x][this.y].imageName == "ladder" ||
-      control.world[this.x][this.y + 1].imageName == "ladder" ||
-      control.world[this.x][this.y].imageName == "rope" ||
-      control.world[this.x][this.y + 1].imageName == "chimney" ||
-      control.world[this.x][this.y + 1] == empty) &&
-    control.world[this.x][this.y + 1].imageName != "brick" &&
-    control.world[this.x][this.y + 1].imageName != "stone"
+    (control.world[actor.x][actor.y].imageName == "ladder" ||
+      control.world[actor.x][actor.y + 1].imageName == "ladder" ||
+      control.world[actor.x][actor.y].imageName == "rope" ||
+      control.world[actor.x][actor.y + 1].imageName == "chimney" ||
+      control.world[actor.x][actor.y + 1] == empty) &&
+    control.world[actor.x][actor.y + 1].imageName != "brick" &&
+    control.world[actor.x][actor.y + 1].imageName != "stone"
   )
     return true;
   return false;
 }
-function canGoLeft(robot) {
+function canGoLeft(actor) {
   if (
-    this.x + dx >= 0 &&
+    actor.x + dx >= 0 &&
     dx == -1 &&
-    control.world[this.x - 1][this.y].imageName != "brick" &&
-    control.world[this.x - 1][this.y].imageName != "stone" &&
-    (control.world[this.x][this.y + 1] != empty ||
-      control.world[this.x][this.y].imageName == "rope") &&
-    (control.world[this.x - 1][this.y + 1].imageName == "brick" ||
-      control.world[this.x - 1][this.y].imageName == "rope" ||
-      control.world[this.x - 1][this.y] == empty ||
-      control.world[this.x - 1][this.y].imageName == "ladder" ||
-      control.world[this.x - 1][this.y].imageName == "gold" ||
-      control.worldActive[this.x][this.y + 1] != empty)
+    control.world[actor.x - 1][actor.y].imageName != "brick" &&
+    control.world[actor.x - 1][actor.y].imageName != "stone" &&
+    (control.world[actor.x][actor.y + 1] != empty ||
+      control.world[actor.x][actor.y].imageName == "rope") &&
+    (control.world[actor.x - 1][actor.y + 1].imageName == "brick" ||
+      control.world[actor.x - 1][actor.y].imageName == "rope" ||
+      control.world[actor.x - 1][actor.y] == empty ||
+      control.world[actor.x - 1][actor.y].imageName == "ladder" ||
+      control.world[actor.x - 1][actor.y].imageName == "gold" ||
+      control.worldActive[actor.x][actor.y + 1] != empty)
   )
     return true;
   return false;
 }
-function canGoRight(robot) {
+function canGoRight(actor) {
   if (
-    this.x + dx < WORLD_WIDTH &&
+    actor.x + dx < WORLD_WIDTH &&
     dx == 1 &&
-    control.world[this.x + 1][this.y].imageName != "brick" &&
-    control.world[this.x + 1][this.y].imageName != "stone" &&
-    (control.world[this.x][this.y + 1] != empty ||
-      control.world[this.x][this.y].imageName == "rope") &&
-    (control.world[this.x + 1][this.y + 1].imageName == "brick" ||
-      control.world[this.x + 1][this.y].imageName == "rope" ||
-      control.world[this.x + 1][this.y] == empty ||
-      control.world[this.x + 1][this.y].imageName == "ladder" ||
-      control.world[this.x + 1][this.y].imageName == "gold" ||
-      control.worldActive[this.x + 1][this.y + 1] != empty)
+    control.world[actor.x + 1][actor.y].imageName != "brick" &&
+    control.world[actor.x + 1][actor.y].imageName != "stone" &&
+    (control.world[actor.x][actor.y + 1] != empty ||
+      control.world[actor.x][actor.y].imageName == "rope") &&
+    (control.world[actor.x + 1][actor.y + 1].imageName == "brick" ||
+      control.world[actor.x + 1][actor.y].imageName == "rope" ||
+      control.world[actor.x + 1][actor.y] == empty ||
+      control.world[actor.x + 1][actor.y].imageName == "ladder" ||
+      control.world[actor.x + 1][actor.y].imageName == "gold" ||
+      control.worldActive[actor.x + 1][actor.y + 1] != empty)
   ) {
     return true;
   }
