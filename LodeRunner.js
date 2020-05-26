@@ -87,20 +87,25 @@ class ActiveActor extends Actor {
             goUp(dy);
             break;
         }
-        //casos em que pode descer
-        if (dx == 0 && dy == 1) {
-          if (
-            (control.world[this.x][this.y].imageName == "ladder" ||
-              control.world[this.x][this.y + 1].imageName == "ladder" ||
-              control.world[this.x][this.y].imageName == "rope" ||
-              control.world[this.x][this.y + 1].imageName == "chimney" ||
-              control.world[this.x][this.y + 1] == empty) &&
-            control.world[this.x][this.y + 1].imageName != "brick" &&
-            control.world[this.x][this.y + 1].imageName != "stone"
-          ) {
-            this.hide();
-            if (this.y % 2 == 0) {
-              this.imageName = "hero_on_ladder_right";
+        //deslocacao para direita
+        if (
+          this.x + dx < WORLD_WIDTH &&
+          dx == 1 &&
+          control.world[this.x + 1][this.y].imageName != "brick" &&
+          control.world[this.x + 1][this.y].imageName != "stone" &&
+          (control.world[this.x][this.y + 1] != empty ||
+            control.world[this.x][this.y].imageName == "rope") &&
+          (control.world[this.x + 1][this.y + 1].imageName == "brick" ||
+            control.world[this.x + 1][this.y].imageName == "rope" ||
+            control.world[this.x + 1][this.y] == empty ||
+            control.world[this.x + 1][this.y].imageName == "ladder" ||
+            control.world[this.x + 1][this.y].imageName == "gold" ||
+            control.worldActive[this.x + 1][this.y + 1] != empty)
+        ) {
+          this.hide();
+          if (control.world[this.x + 1][this.y].imageName == "rope") {
+            if (this.x % 2 == 0) {
+              this.imageName = "hero_on_rope_left";
             } else {
               this.imageName = "hero_on_ladder_left";
             }
@@ -110,15 +115,18 @@ class ActiveActor extends Actor {
         } else {
           //deslocacao para direita
           if (
-            this.x + dx < WORLD_WIDTH &&
-            dx == 1 &&
-            control.world[this.x + 1][this.y].imageName != "brick" &&
-            control.world[this.x + 1][this.y].imageName != "stone" &&
-            (control.world[this.x + 1][this.y].imageName == "rope" ||
-              control.world[this.x + 1][this.y] == empty ||
-              control.world[this.x + 1][this.y].imageName == "ladder" ||
-              control.world[this.x + 1][this.y].imageName == "gold" ||
-              control.worldActive[this.x + 1][this.y + 1] != empty)
+            this.x + dx >= 0 &&
+            dx == -1 &&
+            control.world[this.x - 1][this.y].imageName != "brick" &&
+            control.world[this.x - 1][this.y].imageName != "stone" &&
+            (control.world[this.x][this.y + 1] != empty ||
+              control.world[this.x][this.y].imageName == "rope") &&
+            (control.world[this.x - 1][this.y + 1].imageName == "brick" ||
+              control.world[this.x - 1][this.y].imageName == "rope" ||
+              control.world[this.x - 1][this.y] == empty ||
+              control.world[this.x - 1][this.y].imageName == "ladder" ||
+              control.world[this.x - 1][this.y].imageName == "gold" ||
+              control.worldActive[this.x][this.y + 1] != empty)
           ) {
             this.hide();
             if (control.world[this.x + 1][this.y].imageName == "rope") {
