@@ -434,6 +434,33 @@ function timeHandler(robo) {
 function robotMovement(heroActor, robotActor) {
   if (heroActor.y > robotActor.y) {
     if (canGoUp(robotActor)) {
+      goUp(robotActor);
+    } else {
+      if (heroActor.x > robotActor.x) {
+        if (canGoRight(robotActor)) {
+          goRight(robotActor);
+        } else goLeft(robotActor);
+      } else if (heroActor.x < robotActor.y) {
+        goLeft(robotActor);
+      } else {
+        goLeft(robotActor);
+      }
+    }
+  } else {
+    if (heroActor.y < robotActor.y) {
+      if (canGoDown(robotActor)) {
+        goDown(robotActor);
+      } else {
+        if (heroActor.x > robotActor.x) {
+          if (canGoRight(robotActor)) {
+            goRight(robotActor);
+          } else goLeft(robotActor);
+        } else if (heroActor.x < robotActor.y) {
+          goLeft(robotActor);
+        } else {
+          goLeft(robotActor);
+        }
+      }
     }
   }
 }
