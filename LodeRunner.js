@@ -216,6 +216,13 @@ class Robot extends ActiveActor {
   animation() {
     var k = robotMovement(hero, this);
     super.animation(k);
+    if (
+      control.world[this.x][this.y] == empty &&
+      control.world[this.x + 1][this.y].imageName == "brick" &&
+      control.world[this.x - 1][this.y].imageName == "brick" &&
+      control.world[this.x][this.y + 1] == empty
+    ) {
+    }
   }
 }
 
@@ -406,7 +413,13 @@ function timeHandler(robo) {
 function robotMovement(heroActor, robotActor) {
   if (heroActor.y > robotActor.y) {
     if (canGoDown(robotActor)) {
-      return [0, 1];
+      if (
+        control.world[robotActor.x][robotActor.y + 1] == empty &&
+        control.world[robotActor.x][robotActor.y].imageName != "rope" &&
+        control.world[robotActor.x][robotActor.y].imageName != "ladder"
+      )
+        return null;
+      else return [0, 1];
     } else {
       if (heroActor.x > robotActor.x) {
         if (canGoRight(robotActor)) {
@@ -502,13 +515,12 @@ function canGoRight(actor) {
   }
   return false;
 }
-
-function sleep(milliseconds) {
-  const date = Date.now();
-  let currentDate = null;
-  do {
-    currentDate = Date.now();
-  } while (currentDate - date < milliseconds);
+function freeze(robot) {
+  Object.freeze(robot);
+}
+function replaceRobot(robot) {
+  robot.x += 1;
+  robot.y -= 1;
 }
 
 function isGoldCollected() {
