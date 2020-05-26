@@ -209,7 +209,9 @@ class Robot extends ActiveActor {
     this.dx = 1;
     this.dy = 0;
   }
-  animation() {}
+  animation() {
+    robotMovement(hero, this);
+  }
 }
 
 // GAME CONTROL
@@ -503,7 +505,6 @@ function canGoDown(robot) {
 function canGoLeft(robot) {
   if (
     this.x + dx >= 0 &&
-    dx == -1 &&
     control.world[this.x - 1][this.y].imageName != "brick" &&
     control.world[this.x - 1][this.y].imageName != "stone" &&
     (control.world[this.x][this.y + 1] != empty ||
@@ -521,7 +522,6 @@ function canGoLeft(robot) {
 function canGoRight(robot) {
   if (
     this.x + dx < WORLD_WIDTH &&
-    dx == 1 &&
     control.world[this.x + 1][this.y].imageName != "brick" &&
     control.world[this.x + 1][this.y].imageName != "stone" &&
     (control.world[this.x][this.y + 1] != empty ||
