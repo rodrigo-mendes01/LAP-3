@@ -316,25 +316,20 @@ function fall(actor) {
     control.world[actor.x][actor.y].imageName != "ladder" &&
     control.worldActive[actor.x][actor.y + 1] == empty
   ) {
-    actor.hide();
     if (actor.y % 2 == 0)
       if (actor instanceof Hero) actor.imageName = "hero_falls_left";
       else actor.imageName = "robot_falls_left";
     else if (actor instanceof Hero) actor.imageName = "hero_falls_right";
     else actor.imageName = "robot_falls_right";
-    actor.y += 1;
-    actor.show();
+    actor.move(0, 1);
   }
   if (control.world[actor.x][actor.y + 1].imageName == "rope") {
-    actor.hide();
-    actor.y += 1;
-    actor.show();
+    actor.move(0, 1);
   }
 }
 
 function goUp(actor) {
   if (canGoUp(actor)) {
-    actor.hide();
     if (actor.y % 2 == 0) {
       if (actor instanceof Hero) actor.imageName = "hero_on_ladder_right";
       else actor.imageName = "robot_on_ladder_right";
@@ -343,13 +338,12 @@ function goUp(actor) {
       else actor.imageName = "robot_on_ladder_left";
     }
     actor.y += -1;
-    actor.show();
+    actor.move(0, -1);
   }
 }
 
 function goDown(actor) {
   if (canGoDown(actor)) {
-    actor.hide();
     if (actor.y % 2 == 0) {
       if (actor instanceof Hero) actor.imageName = "hero_on_ladder_right";
       else actor.imageName = "robot_on_ladder_right";
@@ -357,14 +351,12 @@ function goDown(actor) {
       if (actor instanceof Hero) actor.imageName = "hero_on_ladder_left";
       else actor.imageName = "robot_on_ladder_left";
     }
-    actor.y += 1;
-    actor.show();
+    actor.move(0, 1);
   }
 }
 
 function goRight(actor) {
   if (canGoRight(actor)) {
-    actor.hide();
     if (control.world[actor.x + 1][actor.y].imageName == "rope") {
       if (actor.x % 2 == 0) {
         if (actor instanceof Hero) actor.imageName = "hero_on_rope_left";
@@ -377,8 +369,7 @@ function goRight(actor) {
       if (actor instanceof Hero) actor.imageName = "hero_runs_right";
       else actor.imageName = "robot_runs_right";
     }
-    actor.x += 1;
-    actor.show();
+    actor.move(1, 0);
   }
 }
 
@@ -396,9 +387,7 @@ function goLeft(actor) {
       if (actor instanceof Hero) actor.imageName = "hero_runs_left";
       else actor.imageName = "robot_runs_left";
     }
-    actor.hide();
-    actor.x -= 1;
-    actor.show();
+    actor.move(-1, 0);
   }
 }
 
