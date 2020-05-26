@@ -223,6 +223,11 @@ class Robot extends ActiveActor {
       control.world[this.x][this.y + 1] == empty
     ) {
     }
+    if (control.world[this.x][this.y].imageName == "gold" && !this.hasGold) {
+      control.world[this.x][this.y].hide();
+      this.hasGold = true;
+      this.show();
+    }
   }
 }
 
@@ -457,12 +462,18 @@ function robotMovement(heroActor, robotActor) {
   return null;
 }
 
+function alreadyOcupied(x, y) {
+  if (control.worldActive[x][y] instanceof Actor) return false;
+  return true;
+}
+
 function canGoUp(actor) {
   if (
     control.world[actor.x][actor.y].imageName == "ladder" &&
     (control.world[actor.x][actor.y - 1] == empty ||
       control.world[actor.x][actor.y - 1].imageName == "ladder" ||
-      control.world[actor.x][actor.y - 1].imageName == "rope")
+      control.world[actor.x][actor.y - 1].imageName == "rope") &&
+    !alreadyOcupied(actor.x, actor.y - 1)
   )
     return true;
   return false;
@@ -475,7 +486,8 @@ function canGoDown(actor) {
       control.world[actor.x][actor.y + 1].imageName == "chimney" ||
       control.world[actor.x][actor.y + 1] == empty) &&
     control.world[actor.x][actor.y + 1].imageName != "brick" &&
-    control.world[actor.x][actor.y + 1].imageName != "stone"
+    control.world[actor.x][actor.y + 1].imageName != "stone" &&
+    !alreadyOcupied(actor.x, actor.y + 1)
   )
     return true;
   return false;
@@ -492,7 +504,8 @@ function canGoLeft(actor) {
       control.world[actor.x - 1][actor.y] == empty ||
       control.world[actor.x - 1][actor.y].imageName == "ladder" ||
       control.world[actor.x - 1][actor.y].imageName == "gold" ||
-      control.worldActive[actor.x][actor.y + 1] != empty)
+      control.worldActive[actor.x][actor.y + 1] != empty) &&
+    !alreadyOcupied(actor.x - 1, actor.y)
   )
     return true;
   return false;
@@ -509,15 +522,18 @@ function canGoRight(actor) {
       control.world[actor.x + 1][actor.y] == empty ||
       control.world[actor.x + 1][actor.y].imageName == "ladder" ||
       control.world[actor.x + 1][actor.y].imageName == "gold" ||
-      control.worldActive[actor.x + 1][actor.y + 1] != empty)
+      control.worldActive[actor.x + 1][actor.y + 1] != empty) &&
+    !alreadyOcupied(actor.x + 1, actor.y)
   ) {
     return true;
   }
   return false;
 }
+
 function freeze(robot) {
   Object.freeze(robot);
 }
+
 function replaceRobot(robot) {
   robot.x += 1;
   robot.y -= 1;
@@ -526,8 +542,11 @@ function replaceRobot(robot) {
 function isGoldCollected() {
   for (let i = 0; i < WORLD_WIDTH; i++) {
     for (let j = 0; j < WORLD_HEIGHT; j++) {
-      if (control.activeWorld[i][j] instanceof Robot)
-        if (control.activeWorld[i][j].hasGold) return false;
+      if (
+        control.worldActive[i][j] instanceof Robot &&
+        control.worldActive[i][j].hasGold
+      )
+        return false;
     }
   }
   for (let i = 0; i < WORLD_WIDTH; i++) {
