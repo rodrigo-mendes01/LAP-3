@@ -19,6 +19,8 @@ TODO:
 -------------------------------------------||----------------------------------------------
 */
 
+// Autores: Rodrigo Mendes (55308), Tomás Silva (55749)
+
 let empty, hero, control;
 
 // ACTORS
@@ -208,6 +210,8 @@ class Robot extends ActiveActor {
     super(x, y, "robot_runs_right");
     this.dx = 1;
     this.dy = 0;
+    var hasGold;
+    this.hasGold = false;
   }
   animation() {
     var k = robotMovement(hero, this);
@@ -498,6 +502,7 @@ function canGoRight(actor) {
   }
   return false;
 }
+
 function sleep(milliseconds) {
   const date = Date.now();
   let currentDate = null;
@@ -505,7 +510,14 @@ function sleep(milliseconds) {
     currentDate = Date.now();
   } while (currentDate - date < milliseconds);
 }
+
 function isGoldCollected() {
+  for (let i = 0; i < WORLD_WIDTH; i++) {
+    for (let j = 0; j < WORLD_HEIGHT; j++) {
+      if (control.activeWorld[i][j] instanceof Robot)
+        if (control.activeWorld[i][j].hasGold) return false;
+    }
+  }
   for (let i = 0; i < WORLD_WIDTH; i++) {
     for (let j = 0; j < WORLD_HEIGHT; j++) {
       if (control.world[i][j].imageName == "gold") return false;
@@ -513,6 +525,7 @@ function isGoldCollected() {
   }
   return true;
 }
+
 function firstEmptyX() {
   for (let i = 0; i < WORLD_WIDTH; i++) {
     if (control.world[i][0] == empty) return i;
