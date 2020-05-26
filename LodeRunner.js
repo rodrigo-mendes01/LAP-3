@@ -418,11 +418,9 @@ function robotMovement(heroActor, robotActor) {
       if (heroActor.x > robotActor.x) {
         if (canGoRight(robotActor)) {
           goRight(robotActor);
-        } else goLeft(robotActor);
-      } else if (heroActor.x < robotActor.y) {
-        goLeft(robotActor);
-      } else {
-        goLeft(robotActor);
+        }
+      } else if (heroActor.x < robotActor.x) {
+        if (canGoLeft(robotActor)) goLeft(robotActor);
       }
     }
   } else {
@@ -433,11 +431,19 @@ function robotMovement(heroActor, robotActor) {
         if (heroActor.x > robotActor.x) {
           if (canGoRight(robotActor)) {
             goRight(robotActor);
-          } else goLeft(robotActor);
-        } else if (heroActor.x < robotActor.y) {
-          goLeft(robotActor);
-        } else {
-          goLeft(robotActor);
+          }
+        } else if (heroActor.x < robotActor.x) {
+          if (canGoLeft(robotActor)) goLeft(robotActor);
+        }
+      }
+    } else {
+      if (heroActor.y == robotActor.y) {
+        if (heroActor.x > robotActor.x) {
+          if (canGoRight(robotActor)) {
+            goRight(robotActor);
+          }
+        } else if (heroActor.x < robotActor.x) {
+          if (canGoLeft(robotActor)) goLeft(robotActor);
         }
       }
     }
