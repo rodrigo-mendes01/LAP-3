@@ -151,7 +151,10 @@ class ActiveActor extends Actor {
           dx == 1 &&
           control.world[this.x + 1][this.y].imageName != "brick" &&
           control.world[this.x + 1][this.y].imageName != "stone" &&
-          (control.world[this.x + 1][this.y].imageName == "rope" ||
+          (control.world[this.x][this.y + 1] != empty ||
+            control.world[this.x][this.y].imageName == "rope") &&
+          (control.world[this.x + 1][this.y + 1].imageName == "brick" ||
+            control.world[this.x + 1][this.y].imageName == "rope" ||
             control.world[this.x + 1][this.y] == empty ||
             control.world[this.x + 1][this.y].imageName == "ladder" ||
             control.world[this.x + 1][this.y].imageName == "gold" ||
@@ -177,7 +180,10 @@ class ActiveActor extends Actor {
             dx == -1 &&
             control.world[this.x - 1][this.y].imageName != "brick" &&
             control.world[this.x - 1][this.y].imageName != "stone" &&
-            (control.world[this.x - 1][this.y].imageName == "rope" ||
+            (control.world[this.x][this.y + 1] != empty ||
+              control.world[this.x][this.y].imageName == "rope") &&
+            (control.world[this.x - 1][this.y + 1].imageName == "brick" ||
+              control.world[this.x - 1][this.y].imageName == "rope" ||
               control.world[this.x - 1][this.y] == empty ||
               control.world[this.x - 1][this.y].imageName == "ladder" ||
               control.world[this.x - 1][this.y].imageName == "gold" ||
@@ -263,6 +269,7 @@ class Hero extends ActiveActor {
     super(x, y, "hero_runs_left");
     let verification;
     this.verification = 0;
+    hero = this;
   }
   animation() {
     super.animation();
