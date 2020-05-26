@@ -333,12 +333,7 @@ function fall(actor) {
 }
 
 function goUp(actor) {
-  if (
-    control.world[actor.x][actor.y].imageName == "ladder" &&
-    (control.world[actor.x][actor.y - 1] == empty ||
-      control.world[actor.x][actor.y - 1].imageName == "ladder" ||
-      control.world[actor.x][actor.y - 1].imageName == "rope")
-  ) {
+  if (canGoUp(actor)) {
     actor.hide();
     if (actor.y % 2 == 0) {
       if (actor instanceof Hero) actor.imageName = "hero_on_ladder_right";
@@ -353,15 +348,7 @@ function goUp(actor) {
 }
 
 function goDown(actor) {
-  if (
-    (control.world[actor.x][actor.y].imageName == "ladder" ||
-      control.world[actor.x][actor.y + 1].imageName == "ladder" ||
-      control.world[actor.x][actor.y].imageName == "rope" ||
-      control.world[actor.x][actor.y + 1].imageName == "chimney" ||
-      control.world[actor.x][actor.y + 1] == empty) &&
-    control.world[actor.x][actor.y + 1].imageName != "brick" &&
-    control.world[actor.x][actor.y + 1].imageName != "stone"
-  ) {
+  if (canGoDown(actor)) {
     actor.hide();
     if (actor.y % 2 == 0) {
       if (actor instanceof Hero) actor.imageName = "hero_on_ladder_right";
@@ -376,19 +363,7 @@ function goDown(actor) {
 }
 
 function goRight(actor) {
-  if (
-    hero.x + 1 < WORLD_WIDTH &&
-    control.world[actor.x + 1][actor.y].imageName != "brick" &&
-    control.world[actor.x + 1][actor.y].imageName != "stone" &&
-    (control.world[actor.x][actor.y + 1] != empty ||
-      control.world[actor.x][actor.y].imageName == "rope") &&
-    (control.world[actor.x + 1][actor.y + 1].imageName == "brick" ||
-      control.world[actor.x + 1][actor.y].imageName == "rope" ||
-      control.world[actor.x + 1][actor.y] == empty ||
-      control.world[actor.x + 1][actor.y].imageName == "ladder" ||
-      control.world[actor.x + 1][actor.y].imageName == "gold" ||
-      control.worldActive[actor.x + 1][actor.y + 1] != empty)
-  ) {
+  if (canGoRight(actor)) {
     hero.hide();
     if (control.world[actor.x + 1][actor.y].imageName == "rope") {
       if (actor.x % 2 == 0) {
@@ -408,19 +383,7 @@ function goRight(actor) {
 }
 
 function goLeft(actor) {
-  if (
-    actor.x - 1 >= 0 &&
-    control.world[actor.x - 1][actor.y].imageName != "brick" &&
-    control.world[actor.x - 1][actor.y].imageName != "stone" &&
-    (control.world[actor.x][actor.y + 1] != empty ||
-      control.world[actor.x][actor.y].imageName == "rope") &&
-    (control.world[actor.x - 1][actor.y + 1].imageName == "brick" ||
-      control.world[actor.x - 1][actor.y].imageName == "rope" ||
-      control.world[actor.x - 1][actor.y] == empty ||
-      control.world[actor.x - 1][actor.y].imageName == "ladder" ||
-      control.world[actor.x - 1][actor.y].imageName == "gold" ||
-      control.worldActive[actor.x][actor.y + 1] != empty)
-  ) {
+  if (canGoLeft(actor)) {
     if (control.world[actor.x - 1][actor.y].imageName == "rope") {
       if (actor.x % 2 == 0) {
         if (actor instanceof Hero) hero.imageName = "hero_on_rope_left";
@@ -446,6 +409,7 @@ function timeHandler(robo) {
   robo.y--;
   robo.show();
 }
+
 function robotMovement(heroActor, robotActor) {
   if (heroActor.y > robotActor.y) {
     if (canGoUp(robotActor)) {
@@ -479,6 +443,7 @@ function robotMovement(heroActor, robotActor) {
     }
   }
 }
+
 function canGoUp(actor) {
   if (
     control.world[actor.x][actor.y].imageName == "ladder" &&
@@ -504,8 +469,7 @@ function canGoDown(actor) {
 }
 function canGoLeft(actor) {
   if (
-    actor.x + dx >= 0 &&
-    dx == -1 &&
+    actor.x - 1 >= 0 &&
     control.world[actor.x - 1][actor.y].imageName != "brick" &&
     control.world[actor.x - 1][actor.y].imageName != "stone" &&
     (control.world[actor.x][actor.y + 1] != empty ||
@@ -522,8 +486,7 @@ function canGoLeft(actor) {
 }
 function canGoRight(actor) {
   if (
-    actor.x + dx < WORLD_WIDTH &&
-    dx == 1 &&
+    actor.x + 1 < WORLD_WIDTH &&
     control.world[actor.x + 1][actor.y].imageName != "brick" &&
     control.world[actor.x + 1][actor.y].imageName != "stone" &&
     (control.world[actor.x][actor.y + 1] != empty ||
