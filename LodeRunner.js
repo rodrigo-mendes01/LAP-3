@@ -73,6 +73,9 @@ class ActiveActor extends Actor {
   }
   animation(k) {
     switch (k) {
+      case "z":
+        stuck(this);
+        break;
       case " ":
         shoot();
         break;
@@ -408,36 +411,25 @@ function goLeft(actor) {
 }
 
 //aux functions
-function timeHandler(robo) {
-  robo.hide();
-  robo.x++;
-  robo.y--;
-  robo.show();
-}
 
 function robotMovement(heroActor, robotActor) {
-  if (heroActor.y > robotActor.y) {
-    if (canGoDown(robotActor)) {
-      if (
-        control.world[robotActor.x][robotActor.y + 1] == empty &&
-        control.world[robotActor.x][robotActor.y].imageName != "rope" &&
-        control.world[robotActor.x][robotActor.y].imageName != "ladder"
-      )
-        return null;
-      else return [0, 1];
-    } else {
-      if (heroActor.x > robotActor.x) {
-        if (canGoRight(robotActor)) {
-          return [1, 0];
-        }
-      } else if (heroActor.x < robotActor.x) {
-        if (canGoLeft(robotActor)) return [-1, 0];
-      }
-    }
+  if (
+    control.world[robotActor.x][robotActor.y] == empty &&
+    control.world[robotActor.x + 1][robotActor.y].imageName == "brick" &&
+    control.world[robotActor.x - 1][robotActor.y].imageName == "brick" &&
+    control.world[robotActor.x][robotActor.y + 1] == empty
+  ) {
+    return "z";
   } else {
-    if (heroActor.y < robotActor.y) {
-      if (canGoUp(robotActor)) {
-        return [0, -1];
+    if (heroActor.y > robotActor.y) {
+      if (canGoDown(robotActor)) {
+        if (
+          control.world[robotActor.x][robotActor.y + 1] == empty &&
+          control.world[robotActor.x][robotActor.y].imageName != "rope" &&
+          control.world[robotActor.x][robotActor.y].imageName != "ladder"
+        )
+          return null;
+        else return [0, 1];
       } else {
         if (heroActor.x > robotActor.x) {
           if (canGoRight(robotActor)) {
@@ -448,18 +440,32 @@ function robotMovement(heroActor, robotActor) {
         }
       }
     } else {
-      if (heroActor.y == robotActor.y) {
-        if (heroActor.x > robotActor.x) {
-          if (canGoRight(robotActor)) {
-            return [1, 0];
+      if (heroActor.y < robotActor.y) {
+        if (canGoUp(robotActor)) {
+          return [0, -1];
+        } else {
+          if (heroActor.x > robotActor.x) {
+            if (canGoRight(robotActor)) {
+              return [1, 0];
+            }
+          } else if (heroActor.x < robotActor.x) {
+            if (canGoLeft(robotActor)) return [-1, 0];
           }
-        } else if (heroActor.x < robotActor.x) {
-          if (canGoLeft(robotActor)) return [-1, 0];
+        }
+      } else {
+        if (heroActor.y == robotActor.y) {
+          if (heroActor.x > robotActor.x) {
+            if (canGoRight(robotActor)) {
+              return [1, 0];
+            }
+          } else if (heroActor.x < robotActor.x) {
+            if (canGoLeft(robotActor)) return [-1, 0];
+          }
         }
       }
     }
+    return null;
   }
-  return null;
 }
 
 function alreadyOcupied(x, y) {
@@ -529,14 +535,9 @@ function canGoRight(actor) {
   }
   return false;
 }
-
-function freeze(robot) {
-  Object.freeze(robot);
-}
-
-function replaceRobot(robot) {
-  robot.x += 1;
-  robot.y -= 1;
+function stuck(robot) {
+  GameFactory.actorFromCode("t", robot.x, robot.y);
+  robot.move(1, -1);
 }
 
 function isGoldCollected() {
