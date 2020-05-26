@@ -5,7 +5,7 @@
 
 // GLOBAL VARIABLES
 
-// tente nÃ£o definir mais nenhuma variÃ¡vel global
+// tente não definir mais nenhuma variável global
 /*
 -------------------------------------------||-------------------------------------------
 TODO:
@@ -13,7 +13,7 @@ TODO:
 1-queda em camara lenta
 2-ladrões a mexer(pensar num algoritmo para seguir)
 3-ladroes a apanhar o ouro, a largar quando caem 
-4-trocar o passar de nivel para dentro da class game em vez de tar na funçao animiation
+4-trocar o passar de nivel para dentro da class gamecontrol em vez de tar na funçao animiation
 5-fazer o choque entre atores ativos,ou seja nao se podem anular uns aos outros
 6-por na classe topo o que e da classe topo e tirar de la o q nao pode tar la
 7-queda dos ladroes entre dois blocos
@@ -234,17 +234,10 @@ class Invalid extends PassiveActor {
 
 class Ladder extends PassiveActor {
   constructor(x, y) {
-    super(x, y, "ladder");
-    this.visible = false;
-  }
-  show() {
-    if (this.visible) super.show();
-  }
-  hide() {
-    if (this.visible) super.show();
+    super(x, y, "empty");
   }
   makeVisible() {
-    this.visible = true;
+    this.imageName = "ladder";
     this.show();
   }
 }
