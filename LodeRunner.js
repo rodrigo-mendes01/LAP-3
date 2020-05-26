@@ -364,7 +364,7 @@ function goDown(actor) {
 
 function goRight(actor) {
   if (canGoRight(actor)) {
-    hero.hide();
+    actor.hide();
     if (control.world[actor.x + 1][actor.y].imageName == "rope") {
       if (actor.x % 2 == 0) {
         if (actor instanceof Hero) actor.imageName = "hero_on_rope_left";
@@ -412,8 +412,8 @@ function timeHandler(robo) {
 
 function robotMovement(heroActor, robotActor) {
   if (heroActor.y > robotActor.y) {
-    if (canGoUp(robotActor)) {
-      goUp(robotActor);
+    if (canGoDown(robotActor)) {
+      goDown(robotActor);
     } else {
       if (heroActor.x > robotActor.x) {
         if (canGoRight(robotActor)) {
@@ -427,8 +427,8 @@ function robotMovement(heroActor, robotActor) {
     }
   } else {
     if (heroActor.y < robotActor.y) {
-      if (canGoDown(robotActor)) {
-        goDown(robotActor);
+      if (canGoUp(robotActor)) {
+        goUp(robotActor);
       } else {
         if (heroActor.x > robotActor.x) {
           if (canGoRight(robotActor)) {
