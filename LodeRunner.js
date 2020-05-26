@@ -72,136 +72,36 @@ class ActiveActor extends Actor {
   }
   animation() {
     var k = control.getKey();
-    if (k == " ") {
-      if (control.world[this.x - 1][this.y + 1].imageName == "brick") {
-        this.imageName = "hero_shoots_left";
-        control.world[this.x - 1][this.y + 1].hide();
-        setTimeout(
-          GameFactory.actorFromCode,
-          5000,
-          "t",
-          this.x - 1,
-          this.y + 1
-        );
-      }
-    }
-    if (k == null) {
-      if (
-        (control.world[this.x][this.y + 1] == empty ||
-          control.world[this.x][this.y + 1].imageName == "gold") &&
-        control.world[this.x][this.y].imageName != "rope" &&
-        control.world[this.x][this.y].imageName != "ladder" &&
-        control.worldActive[this.x][this.y + 1] == empty
-      ) {
-        this.hide();
-        if (this.y % 2 == 0) this.imageName = "hero_falls_left";
-        else this.imageName = "hero_falls_right";
-        this.y += 1;
-        this.show();
-      }
-      if (control.world[this.x][this.y + 1].imageName == "rope") {
-        this.hide();
-        this.y += 1;
-        this.show();
-      }
-    } else {
-      let [dx, dy] = k;
-      //casos em que pode subir
-      if (dx == 0 && dy == -1) {
-        if (
-          control.world[this.x][this.y].imageName == "ladder" &&
-          (control.world[this.x][this.y - 1] == empty ||
-            control.world[this.x][this.y - 1].imageName == "ladder" ||
-            control.world[this.x][this.y - 1].imageName == "rope")
-        ) {
-          this.hide();
-          if (this.y % 2 == 0) {
-            this.imageName = "hero_on_ladder_right";
-          } else {
-            this.imageName = "hero_on_ladder_left";
-          }
-          this.y += dy;
-          this.show();
-        }
-      }
-      //casos em que pode descer
-      else if (dx == 0 && dy == 1) {
-        if (
-          (control.world[this.x][this.y].imageName == "ladder" ||
-            control.world[this.x][this.y + 1].imageName == "ladder" ||
-            control.world[this.x][this.y].imageName == "rope" ||
-            control.world[this.x][this.y + 1].imageName == "chimney" ||
-            control.world[this.x][this.y + 1] == empty) &&
-          control.world[this.x][this.y + 1].imageName != "brick" &&
-          control.world[this.x][this.y + 1].imageName != "stone"
-        ) {
-          this.hide();
-          if (this.y % 2 == 0) {
-            this.imageName = "hero_on_ladder_right";
-          } else {
-            this.imageName = "hero_on_ladder_left";
-          }
-          this.y += dy;
-          this.show();
-        }
-      } else {
-        //deslocacao para direita
-        if (
-          this.x + dx < WORLD_WIDTH &&
-          dx == 1 &&
-          control.world[this.x + 1][this.y].imageName != "brick" &&
-          control.world[this.x + 1][this.y].imageName != "stone" &&
-          (control.world[this.x][this.y + 1] != empty ||
-            control.world[this.x][this.y].imageName == "rope") &&
-          (control.world[this.x + 1][this.y + 1].imageName == "brick" ||
-            control.world[this.x + 1][this.y].imageName == "rope" ||
-            control.world[this.x + 1][this.y] == empty ||
-            control.world[this.x + 1][this.y].imageName == "ladder" ||
-            control.world[this.x + 1][this.y].imageName == "gold" ||
-            control.worldActive[this.x + 1][this.y + 1] != empty)
-        ) {
-          this.hide();
-          if (control.world[this.x + 1][this.y].imageName == "rope") {
-            if (this.x % 2 == 0) {
-              this.imageName = "hero_on_rope_left";
-            } else {
-              this.imageName = "hero_on_rope_right";
+    switch (k) {
+      case " ":
+        shoot();
+        break;
+      case null:
+        fall();
+        break;
+      default: {
+        let [dx, dy] = k;
+        switch (dx) {
+          case 0:
+            switch (dy) {
+              // player goes up
+              case -1:
+                goUp();
+                break;
+              // player goes down
+              case 1:
+                goDown();
+                break;
             }
-          } else {
-            this.imageName = "hero_runs_right";
-          }
-          this.x += dx;
-          this.show();
-        }
-        //deslocacao para esquerda
-        else {
-          if (
-            this.x + dx >= 0 &&
-            dx == -1 &&
-            control.world[this.x - 1][this.y].imageName != "brick" &&
-            control.world[this.x - 1][this.y].imageName != "stone" &&
-            (control.world[this.x][this.y + 1] != empty ||
-              control.world[this.x][this.y].imageName == "rope") &&
-            (control.world[this.x - 1][this.y + 1].imageName == "brick" ||
-              control.world[this.x - 1][this.y].imageName == "rope" ||
-              control.world[this.x - 1][this.y] == empty ||
-              control.world[this.x - 1][this.y].imageName == "ladder" ||
-              control.world[this.x - 1][this.y].imageName == "gold" ||
-              control.worldActive[this.x][this.y + 1] != empty)
-          ) {
-            if (control.world[this.x - 1][this.y].imageName == "rope") {
-              if (this.x % 2 == 0) {
-                this.imageName = "hero_on_rope_left";
-              } else {
-                this.imageName = "hero_on_rope_right";
-              }
-            } else {
-              this.imageName = "hero_runs_left";
-            }
-            this.hide();
-            this.x += dx;
-            this.show();
-          }
+            break;
+          //player goes right
+          case 1:
+            goRight();
+            break;
+          //player goes left
+          case -1:
+            goLeft();
+            break;
         }
       }
     }
@@ -396,6 +296,134 @@ class GameControl {
   }
   keyUpEvent(k) {}
 }
+
+// Active Actor functions
+function shoot() {
+  if (control.world[hero.x - 1][hero.y + 1].imageName == "brick") {
+    hero.imageName = "hero_shoots_left";
+    control.world[hero.x - 1][hero.y + 1].hide();
+    setTimeout(GameFactory.actorFromCode, 5000, "t", hero.x - 1, hero.y + 1);
+  }
+}
+
+function fall() {
+  if (
+    (control.world[hero.x][hero.y + 1] == empty ||
+      control.world[hero.x][hero.y + 1].imageName == "gold") &&
+    control.world[hero.x][hero.y].imageName != "rope" &&
+    control.world[hero.x][hero.y].imageName != "ladder" &&
+    control.worldActive[hero.x][hero.y + 1] == empty
+  ) {
+    hero.hide();
+    if (hero.y % 2 == 0) hero.imageName = "hero_falls_left";
+    else hero.imageName = "hero_falls_right";
+    hero.y += 1;
+    hero.show();
+  }
+  if (control.world[hero.x][hero.y + 1].imageName == "rope") {
+    hero.hide();
+    hero.y += 1;
+    hero.show();
+  }
+}
+
+function goUp() {
+  if (
+    control.world[hero.x][hero.y].imageName == "ladder" &&
+    (control.world[hero.x][hero.y - 1] == empty ||
+      control.world[hero.x][hero.y - 1].imageName == "ladder" ||
+      control.world[hero.x][hero.y - 1].imageName == "rope")
+  ) {
+    hero.hide();
+    if (hero.y % 2 == 0) {
+      hero.imageName = "hero_on_ladder_right";
+    } else {
+      hero.imageName = "hero_on_ladder_left";
+    }
+    hero.y += -1;
+    hero.show();
+  }
+}
+
+function goDown() {
+  if (
+    (control.world[hero.x][hero.y].imageName == "ladder" ||
+      control.world[hero.x][hero.y + 1].imageName == "ladder" ||
+      control.world[hero.x][hero.y].imageName == "rope" ||
+      control.world[hero.x][hero.y + 1].imageName == "chimney" ||
+      control.world[hero.x][hero.y + 1] == empty) &&
+    control.world[hero.x][hero.y + 1].imageName != "brick" &&
+    control.world[hero.x][hero.y + 1].imageName != "stone"
+  ) {
+    hero.hide();
+    if (hero.y % 2 == 0) {
+      hero.imageName = "hero_on_ladder_right";
+    } else {
+      hero.imageName = "hero_on_ladder_left";
+    }
+    hero.y += 1;
+    hero.show();
+  }
+}
+
+function goRight() {
+  if (
+    hero.x + 1 < WORLD_WIDTH &&
+    control.world[hero.x + 1][hero.y].imageName != "brick" &&
+    control.world[hero.x + 1][hero.y].imageName != "stone" &&
+    (control.world[hero.x][hero.y + 1] != empty ||
+      control.world[hero.x][hero.y].imageName == "rope") &&
+    (control.world[hero.x + 1][hero.y + 1].imageName == "brick" ||
+      control.world[hero.x + 1][hero.y].imageName == "rope" ||
+      control.world[hero.x + 1][hero.y] == empty ||
+      control.world[hero.x + 1][hero.y].imageName == "ladder" ||
+      control.world[hero.x + 1][hero.y].imageName == "gold" ||
+      control.worldActive[hero.x + 1][hero.y + 1] != empty)
+  ) {
+    hero.hide();
+    if (control.world[hero.x + 1][hero.y].imageName == "rope") {
+      if (hero.x % 2 == 0) {
+        hero.imageName = "hero_on_rope_left";
+      } else {
+        hero.imageName = "hero_on_rope_right";
+      }
+    } else {
+      hero.imageName = "hero_runs_right";
+    }
+    hero.x += 1;
+    hero.show();
+  }
+}
+
+function goLeft() {
+  if (
+    hero.x - 1 >= 0 &&
+    control.world[hero.x - 1][hero.y].imageName != "brick" &&
+    control.world[hero.x - 1][hero.y].imageName != "stone" &&
+    (control.world[hero.x][hero.y + 1] != empty ||
+      control.world[hero.x][hero.y].imageName == "rope") &&
+    (control.world[hero.x - 1][hero.y + 1].imageName == "brick" ||
+      control.world[hero.x - 1][hero.y].imageName == "rope" ||
+      control.world[hero.x - 1][hero.y] == empty ||
+      control.world[hero.x - 1][hero.y].imageName == "ladder" ||
+      control.world[hero.x - 1][hero.y].imageName == "gold" ||
+      control.worldActive[hero.x][hero.y + 1] != empty)
+  ) {
+    if (control.world[hero.x - 1][hero.y].imageName == "rope") {
+      if (hero.x % 2 == 0) {
+        hero.imageName = "hero_on_rope_left";
+      } else {
+        hero.imageName = "hero_on_rope_right";
+      }
+    } else {
+      hero.imageName = "hero_runs_left";
+    }
+    hero.hide();
+    hero.x -= 1;
+    hero.show();
+  }
+}
+
 //aux functions
 function timeHandler(robo) {
   robo.hide();
