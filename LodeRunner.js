@@ -331,16 +331,15 @@ class GameControl {
 }
 
 // Active Actor functions
-function shoot(h) {
-  if (control.world[h.x - 1][h.y + 1].imageName == "brick") {
-    h.imageName = "hero_shoots_left";
-    control.world[h.x - 1][h.y + 1].hide();
-    setTimeout(GameFactory.actorFromCode, 5000, "t", h.x - 1, h.y + 1);
+function shoot(hero) {
+  if (control.world[hero.x - 1][hero.y + 1].imageName == "brick") {
+    hero.imageName = "hero_shoots_left";
+    control.world[hero.x - 1][hero.y + 1].hide();
+    setTimeout(GameFactory.actorFromCode, 5000, "t", hero.x - 1, hero.y + 1);
   }
 }
 
 function fall(actor) {
-  // TODO: corrigir bug hold on air
   if (
     actor.y + 1 < WORLD_HEIGHT &&
     (control.world[actor.x][actor.y + 1] == empty ||
@@ -586,8 +585,10 @@ function onLoad() {
   });
 }
 
-function b1() {
-  mesg("button1");
+function toggleMusic() {
+  if (audio != null)
+    if (audio.paused == false) audio.pause();
+    else audio.play();
 }
 function b2() {
   mesg("button2");
