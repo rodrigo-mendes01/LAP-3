@@ -9,13 +9,20 @@
 /*
 -------------------------------------------||-------------------------------------------
 TODO:
+  Bugs:
+    - Queda ladrão extremidades, impede feature do ouro
+    - Ladrões em cima uns dos outros, impede choque de atores
+  
+  Refactors:
+    - Mudar transição de nível de Hero para GameControl
 
-2-ladrões a mexer(pensar num algoritmo para seguir)
-3-ladroes a apanhar o ouro, a largar quando caem 
-4-trocar o passar de nivel para dentro da class gamecontrol em vez de tar na funçao animiation
-5-fazer o choque entre atores ativos,ou seja nao se podem anular uns aos outros
-6-por na classe topo o que e da classe topo e tirar de la o q nao pode tar la
-7-queda dos ladroes entre dois blocos
+  Features:
+    - Imagem shoot
+    - HTML melhorado
+      - Pontos
+      - Botão reset
+      - Select level
+    - Sons variados
 -------------------------------------------||----------------------------------------------
 */
 
@@ -353,7 +360,8 @@ class Hero extends ActiveActor {
       this.verification = 1;
       control.appearFinalLadder();
     }
-    //da um nivel novo depois dos requesitos anteriores
+    //da um nivel novo depois dos requisitos anteriores
+    // mudar para game control
     if (
       control.isGoldCollected() &&
       this.y == 0 &&
@@ -448,7 +456,7 @@ class Robot extends ActiveActor {
       }
       this.stop = true;
       control.world[this.x][this.y] == empty;
-      setTimeout(this.rearrangeRobot, 5000);
+      setTimeout(this.rearrangeRobot, 5000, this);
     }
     if (this.stop == false) {
       var k = this.robotMovement(hero, this);
@@ -461,10 +469,10 @@ class Robot extends ActiveActor {
     }
   }
 
-  rearrangeRobot() {
+  rearrangeRobot(robot) {
     this.stop = false;
-    this.move(1, -1);
-    GameFactory.actorFromCode("t", this.x - 1, this.y + 1);
+    robot.move(1, -1);
+    GameFactory.actorFromCode("t", robot.x - 1, robot.y + 1);
   }
 }
 
