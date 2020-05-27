@@ -96,7 +96,7 @@ class PassiveActor extends Actor {
 class ActiveActor extends Actor {
   constructor(x, y, imageName) {
     super(x, y, imageName);
-    let character = "Vilain";
+    let character;
     this.time = 0; // timestamp used in the control of the animations
   }
   show() {
@@ -111,20 +111,29 @@ class ActiveActor extends Actor {
   canGoUp() {
     let curBlock = control.getWorld(this.x, this.y);
     let blockAbove = control.getWorld(this.x, this.y - 1);
-    return (
-      curBlock.isClimbable() &&
-      (blockAbove.isClimbable() ||
-        blockAbove.isGrabable() ||
-        blockAbove.isTraversable()) &&
+    if (
+      curBlock != null &&
+      blockAbove != null &&
       !control.alreadyOcupied(this.x, this.y - 1)
-    );
+    )
+      return (
+        curBlock.isClimbable() &&
+        (blockAbove.isClimbable() ||
+          blockAbove.isGrabable() ||
+          blockAbove.isTraversable()) &&
+        !control.alreadyOcupied(this.x, this.y - 1)
+      );
+    return false;
   }
 
   canGoDown() {
     let blockBelow = control.getWorld(this.x, this.y + 1);
-    return (
-      blockBelow.isTraversable() && !control.alreadyOcupied(this.x, this.y + 1)
-    );
+    if (blockBelow != null && !control.alreadyOcupied(this.x, this.y + 1))
+      return (
+        blockBelow.isTraversable() &&
+        !control.alreadyOcupied(this.x, this.y + 1)
+      );
+    return false;
   }
 
   canGoLeft() {
@@ -132,14 +141,22 @@ class ActiveActor extends Actor {
     let leftBlock = control.getWorld(this.x - 1, this.y);
     let belowBlock = control.getWorld(this.x, this.y + 1);
     let belowBlockActive = control.getWorldActive(this.x, this.y + 1);
-    if (this.x - 1 >= 0 && !control.alreadyOcupied(this.x - 1, this.y))
-      if (belowBlock.isWalkable() || belowBlockActive.character == "Vilain") {
+    if (
+      curBlock != null &&
+      leftBlock != null &&
+      belowBlock != null &&
+      belowBlockActive != null &&
+      !control.alreadyOcupied(this.x - 1, this.y)
+    ) {
+      if (belowBlock.isWalkable() || belowBlockActive.character == "Villain") {
         if (leftBlock.isTraversable() || leftBlock.isGrabable()) return true;
       } else if (
         curBlock.isGrabable() &&
         (leftBlock.isTraversable() || leftBlock.isGrabable())
       )
         return true;
+      return false;
+    }
     return false;
   }
 
@@ -147,14 +164,23 @@ class ActiveActor extends Actor {
     let curBlock = control.getWorld(this.x, this.y);
     let rightBlock = control.getWorld(this.x + 1, this.y);
     let belowBlock = control.getWorld(this.x, this.y + 1);
-    if (this.x + 1 < WORLD_WIDTH && !control.alreadyOcupied(this.x + 1, this.y))
-      if (belowBlock.isWalkable()) {
+    let belowBlockActive = control.getWorldActive(this.x, this.y + 1);
+    if (
+      curBlock != null &&
+      rightBlock != null &&
+      belowBlock != null &&
+      belowBlockActive != null &&
+      !control.alreadyOcupied(this.x + 1, this.y)
+    ) {
+      if (belowBlock.isWalkable() || belowBlockActive.character == "Villain") {
         if (rightBlock.isTraversable() || rightBlock.isGrabable()) return true;
       } else if (
         curBlock.isGrabable() &&
         (rightBlock.isTraversable() || rightBlock.isGrabable())
       )
         return true;
+      return false;
+    }
     return false;
   }
 
@@ -351,10 +377,10 @@ class Stone extends PassiveActor {
 class Hero extends ActiveActor {
   constructor(x, y) {
     super(x, y, "hero_runs_left");
-    this.character = "Hero";
     let verification;
     this.verification = 0;
     hero = this;
+    this.character = "Hero";
   }
 
   shoot() {
@@ -414,10 +440,15 @@ class Robot extends ActiveActor {
     super(x, y, "robot_runs_right");
     this.dx = 1;
     this.dy = 0;
-    var hasGold;
+    let hasGold;
     this.hasGold = false;
-    var stop;
+    let stop;
     this.stop = false;
+    this.character = "Villain";
+  }
+
+  isWalkable() {
+    return walkable;
   }
 
   robotMovement() {
@@ -581,11 +612,17 @@ class GameControl {
         }
       }
   }
+
   getWorld(x, y) {
-    return this.world[x][y];
+    if (x >= 0 && x < WORLD_WIDTH && y >= 0 && y < WORLD_HEIGHT)
+      return this.world[x][y];
+    else return null;
   }
+
   getWorldActive(x, y) {
-    return this.worldActive[x][y];
+    if (x >= 0 && x < WORLD_WIDTH && y >= 0 && y < WORLD_HEIGHT)
+      return this.worldActive[x][y];
+    else return null;
   }
   keyDownEvent(k) {
     control.key = k.keyCode;
