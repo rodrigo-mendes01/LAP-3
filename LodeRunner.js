@@ -71,13 +71,167 @@ class ActiveActor extends Actor {
     control.worldActive[this.x][this.y] = empty;
     control.world[this.x][this.y].draw(this.x, this.y);
   }
+
+  canGoUp(actor) {
+    if (
+      actor.y - 1 >= 0 &&
+      control.world[actor.x][actor.y].imageName == "ladder" &&
+      (control.world[actor.x][actor.y - 1] == empty ||
+        control.world[actor.x][actor.y - 1].imageName == "ladder" ||
+        control.world[actor.x][actor.y - 1].imageName == "rope") &&
+      !alreadyOcupied(actor.x, actor.y - 1)
+    )
+      return true;
+    return false;
+  }
+
+  canGoDown(actor) {
+    if (
+      actor.y + 1 < WORLD_HEIGHT &&
+      (control.world[actor.x][actor.y].imageName == "ladder" ||
+        control.world[actor.x][actor.y + 1].imageName == "ladder" ||
+        control.world[actor.x][actor.y].imageName == "rope" ||
+        control.world[actor.x][actor.y + 1].imageName == "chimney" ||
+        control.world[actor.x][actor.y + 1] == empty) &&
+      control.world[actor.x][actor.y + 1].imageName != "brick" &&
+      control.world[actor.x][actor.y + 1].imageName != "stone" &&
+      !alreadyOcupied(actor.x, actor.y + 1)
+    )
+      return true;
+    return false;
+  }
+
+  canGoLeft(actor) {
+    if (
+      actor.x - 1 >= 0 &&
+      control.world[actor.x - 1][actor.y].imageName != "brick" &&
+      control.world[actor.x - 1][actor.y].imageName != "stone" &&
+      (control.world[actor.x][actor.y + 1] != empty ||
+        control.world[actor.x][actor.y].imageName == "rope" ||
+        control.worldActive[actor.x][actor.y + 1] != empty) &&
+      (control.world[actor.x - 1][actor.y + 1].imageName == "brick" ||
+        control.world[actor.x - 1][actor.y].imageName == "rope" ||
+        control.world[actor.x - 1][actor.y] == empty ||
+        control.world[actor.x - 1][actor.y].imageName == "ladder" ||
+        control.world[actor.x - 1][actor.y].imageName == "gold" ||
+        control.worldActive[actor.x][actor.y + 1] != empty) &&
+      !alreadyOcupied(actor.x - 1, actor.y)
+    )
+      return true;
+    return false;
+  }
+
+  canGoRight(actor) {
+    if (
+      actor.x + 1 < WORLD_WIDTH &&
+      control.world[actor.x + 1][actor.y].imageName != "brick" &&
+      control.world[actor.x + 1][actor.y].imageName != "stone" &&
+      (control.world[actor.x][actor.y + 1] != empty ||
+        control.world[actor.x][actor.y].imageName == "rope" ||
+        control.worldActive[actor.x][actor.y + 1] != empty) &&
+      (control.world[actor.x + 1][actor.y + 1].imageName == "brick" ||
+        control.world[actor.x + 1][actor.y].imageName == "rope" ||
+        control.world[actor.x + 1][actor.y] == empty ||
+        control.world[actor.x + 1][actor.y].imageName == "ladder" ||
+        control.world[actor.x + 1][actor.y].imageName == "gold" ||
+        control.worldActive[actor.x + 1][actor.y + 1] != empty) &&
+      !alreadyOcupied(actor.x + 1, actor.y)
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  fall(actor) {
+    if (
+      actor.y + 1 < WORLD_HEIGHT &&
+      (control.world[actor.x][actor.y + 1] == empty ||
+        control.world[actor.x][actor.y + 1].imageName == "gold") &&
+      control.world[actor.x][actor.y].imageName != "rope" &&
+      control.world[actor.x][actor.y].imageName != "ladder" &&
+      control.worldActive[actor.x][actor.y + 1] == empty
+    ) {
+      if (actor.y % 2 == 0)
+        if (actor instanceof Hero) actor.imageName = "hero_falls_left";
+        else actor.imageName = "robot_falls_left";
+      else if (actor instanceof Hero) actor.imageName = "hero_falls_right";
+      else actor.imageName = "robot_falls_right";
+      actor.move(0, 1);
+    }
+    if (control.world[actor.x][actor.y + 1].imageName == "rope") {
+      actor.move(0, 1);
+    }
+  }
+
+  goUp(actor) {
+    if (this.canGoUp(actor)) {
+      if (actor.y % 2 == 0) {
+        if (actor instanceof Hero) actor.imageName = "hero_on_ladder_right";
+        else actor.imageName = "robot_on_ladder_right";
+      } else {
+        if (actor instanceof Hero) actor.imageName = "hero_on_ladder_left";
+        else actor.imageName = "robot_on_ladder_left";
+      }
+      actor.move(0, -1);
+    }
+  }
+
+  goDown(actor) {
+    if (this.canGoDown(actor)) {
+      if (actor.y % 2 == 0) {
+        if (actor instanceof Hero) actor.imageName = "hero_on_ladder_right";
+        else actor.imageName = "robot_on_ladder_right";
+      } else {
+        if (actor instanceof Hero) actor.imageName = "hero_on_ladder_left";
+        else actor.imageName = "robot_on_ladder_left";
+      }
+      actor.move(0, 1);
+    }
+  }
+
+  goRight(actor) {
+    if (this.canGoRight(actor)) {
+      if (control.world[actor.x + 1][actor.y].imageName == "rope") {
+        if (actor.x % 2 == 0) {
+          if (actor instanceof Hero) actor.imageName = "hero_on_rope_left";
+          else actor.imageName = "robot_on_rope_left";
+        } else {
+          if (actor instanceof Hero) actor.imageName = "hero_on_rope_right";
+          else actor.imageName = "robot_on_rope_right";
+        }
+      } else {
+        if (actor instanceof Hero) actor.imageName = "hero_runs_right";
+        else actor.imageName = "robot_runs_right";
+      }
+      actor.move(1, 0);
+    }
+  }
+
+  goLeft(actor) {
+    if (this.canGoLeft(actor)) {
+      if (control.world[actor.x - 1][actor.y].imageName == "rope") {
+        if (actor.x % 2 == 0) {
+          if (actor instanceof Hero) hero.imageName = "hero_on_rope_left";
+          else actor.imageName = "robot_on_rope_left";
+        } else {
+          if (actor instanceof Hero) hero.imageName = "hero_on_rope_right";
+          else actor.imageName = "robot_on_rope_right";
+        }
+      } else {
+        if (actor instanceof Hero) actor.imageName = "hero_runs_left";
+        else actor.imageName = "robot_runs_left";
+      }
+      actor.move(-1, 0);
+    }
+  }
+
   animation(k) {
     switch (k) {
       case " ":
-        shoot(this);
+        this.shoot(this);
         break;
       case null:
-        fall(this);
+        this.fall(this);
         break;
       default: {
         let [dx, dy] = k;
@@ -86,21 +240,21 @@ class ActiveActor extends Actor {
             switch (dy) {
               // player goes up
               case -1:
-                goUp(this);
+                this.goUp(this);
                 break;
               // player goes down
               case 1:
-                goDown(this);
+                this.goDown(this);
                 break;
             }
             break;
           //player goes right
           case 1:
-            goRight(this);
+            this.goRight(this);
             break;
           //player goes left
           case -1:
-            goLeft(this);
+            this.goLeft(this);
             break;
         }
       }
@@ -171,6 +325,15 @@ class Hero extends ActiveActor {
     this.verification = 0;
     hero = this;
   }
+
+  shoot(hero) {
+    if (control.world[hero.x - 1][hero.y + 1].imageName == "brick") {
+      hero.imageName = "hero_shoots_left";
+      control.world[hero.x - 1][hero.y + 1].hide();
+      setTimeout(GameFactory.actorFromCode, 5000, "t", hero.x - 1, hero.y + 1);
+    }
+  }
+
   animation() {
     var k = control.getKey();
     if (k != null && audio == null) {
@@ -186,13 +349,13 @@ class Hero extends ActiveActor {
       control.world[this.x][this.y].hide();
       this.show();
     }
-    if (isGoldCollected() && this.verification == 0) {
+    if (control.isGoldCollected() && this.verification == 0) {
       this.verification = 1;
-      appearFinalLadder();
+      control.appearFinalLadder();
     }
     //da um nivel novo depois dos requesitos anteriores
     if (
-      isGoldCollected() &&
+      control.isGoldCollected() &&
       this.y == 0 &&
       control.world[this.x][this.y].imageName == "ladder"
     ) {
@@ -215,6 +378,54 @@ class Robot extends ActiveActor {
     var stop;
     this.stop = false;
   }
+
+  robotMovement(heroActor, robotActor) {
+    if (heroActor.y > robotActor.y) {
+      if (super.canGoDown(robotActor)) {
+        if (
+          control.world[robotActor.x][robotActor.y + 1] == empty &&
+          control.world[robotActor.x][robotActor.y].imageName != "rope" &&
+          control.world[robotActor.x][robotActor.y].imageName != "ladder"
+        )
+          return null;
+        else return [0, 1];
+      } else {
+        if (heroActor.x > robotActor.x) {
+          if (super.canGoRight(robotActor)) {
+            return [1, 0];
+          }
+        } else if (heroActor.x < robotActor.x) {
+          if (super.canGoLeft(robotActor)) return [-1, 0];
+        }
+      }
+    } else {
+      if (heroActor.y < robotActor.y) {
+        if (super.canGoUp(robotActor)) {
+          return [0, -1];
+        } else {
+          if (heroActor.x > robotActor.x) {
+            if (super.canGoRight(robotActor)) {
+              return [1, 0];
+            }
+          } else if (heroActor.x < robotActor.x) {
+            if (super.canGoLeft(robotActor)) return [-1, 0];
+          }
+        }
+      } else {
+        if (heroActor.y == robotActor.y) {
+          if (heroActor.x > robotActor.x) {
+            if (super.canGoRight(robotActor)) {
+              return [1, 0];
+            }
+          } else if (heroActor.x < robotActor.x) {
+            if (super.canGoLeft(robotActor)) return [-1, 0];
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   animation() {
     if (this.time % 2 == 0) return;
     if (
@@ -235,7 +446,7 @@ class Robot extends ActiveActor {
       setTimeout(rearranjeRobot, 5000, this);
     }
     if (this.stop == false) {
-      var k = robotMovement(hero, this);
+      var k = this.robotMovement(hero, this);
       super.animation(k);
       if (control.world[this.x][this.y].imageName == "gold" && !this.hasGold) {
         control.world[this.x][this.y].hide();
@@ -243,6 +454,12 @@ class Robot extends ActiveActor {
         this.show();
       }
     }
+  }
+
+  rearranjeRobot(robot) {
+    robot.stop = false;
+    robot.move(1, -1);
+    GameFactory.actorFromCode("t", robot.x - 1, robot.y + 1);
   }
 }
 
@@ -328,252 +545,37 @@ class GameControl {
     control.key = k.keyCode;
   }
   keyUpEvent(k) {}
-}
 
-// Active Actor functions
-function shoot(hero) {
-  if (control.world[hero.x - 1][hero.y + 1].imageName == "brick") {
-    hero.imageName = "hero_shoots_left";
-    control.world[hero.x - 1][hero.y + 1].hide();
-    setTimeout(GameFactory.actorFromCode, 5000, "t", hero.x - 1, hero.y + 1);
-  }
-}
-
-function fall(actor) {
-  if (
-    actor.y + 1 < WORLD_HEIGHT &&
-    (control.world[actor.x][actor.y + 1] == empty ||
-      control.world[actor.x][actor.y + 1].imageName == "gold") &&
-    control.world[actor.x][actor.y].imageName != "rope" &&
-    control.world[actor.x][actor.y].imageName != "ladder" &&
-    control.worldActive[actor.x][actor.y + 1] == empty
-  ) {
-    if (actor.y % 2 == 0)
-      if (actor instanceof Hero) actor.imageName = "hero_falls_left";
-      else actor.imageName = "robot_falls_left";
-    else if (actor instanceof Hero) actor.imageName = "hero_falls_right";
-    else actor.imageName = "robot_falls_right";
-    actor.move(0, 1);
-  }
-  if (control.world[actor.x][actor.y + 1].imageName == "rope") {
-    actor.move(0, 1);
-  }
-}
-
-function goUp(actor) {
-  if (canGoUp(actor)) {
-    if (actor.y % 2 == 0) {
-      if (actor instanceof Hero) actor.imageName = "hero_on_ladder_right";
-      else actor.imageName = "robot_on_ladder_right";
-    } else {
-      if (actor instanceof Hero) actor.imageName = "hero_on_ladder_left";
-      else actor.imageName = "robot_on_ladder_left";
-    }
-    actor.move(0, -1);
-  }
-}
-
-function goDown(actor) {
-  if (canGoDown(actor)) {
-    if (actor.y % 2 == 0) {
-      if (actor instanceof Hero) actor.imageName = "hero_on_ladder_right";
-      else actor.imageName = "robot_on_ladder_right";
-    } else {
-      if (actor instanceof Hero) actor.imageName = "hero_on_ladder_left";
-      else actor.imageName = "robot_on_ladder_left";
-    }
-    actor.move(0, 1);
-  }
-}
-
-function goRight(actor) {
-  if (canGoRight(actor)) {
-    if (control.world[actor.x + 1][actor.y].imageName == "rope") {
-      if (actor.x % 2 == 0) {
-        if (actor instanceof Hero) actor.imageName = "hero_on_rope_left";
-        else actor.imageName = "robot_on_rope_left";
-      } else {
-        if (actor instanceof Hero) actor.imageName = "hero_on_rope_right";
-        else actor.imageName = "robot_on_rope_right";
-      }
-    } else {
-      if (actor instanceof Hero) actor.imageName = "hero_runs_right";
-      else actor.imageName = "robot_runs_right";
-    }
-    actor.move(1, 0);
-  }
-}
-
-function goLeft(actor) {
-  if (canGoLeft(actor)) {
-    if (control.world[actor.x - 1][actor.y].imageName == "rope") {
-      if (actor.x % 2 == 0) {
-        if (actor instanceof Hero) hero.imageName = "hero_on_rope_left";
-        else actor.imageName = "robot_on_rope_left";
-      } else {
-        if (actor instanceof Hero) hero.imageName = "hero_on_rope_right";
-        else actor.imageName = "robot_on_rope_right";
-      }
-    } else {
-      if (actor instanceof Hero) actor.imageName = "hero_runs_left";
-      else actor.imageName = "robot_runs_left";
-    }
-    actor.move(-1, 0);
-  }
-}
-
-//aux functions
-
-function robotMovement(heroActor, robotActor) {
-  if (heroActor.y > robotActor.y) {
-    if (canGoDown(robotActor)) {
-      if (
-        control.world[robotActor.x][robotActor.y + 1] == empty &&
-        control.world[robotActor.x][robotActor.y].imageName != "rope" &&
-        control.world[robotActor.x][robotActor.y].imageName != "ladder"
-      )
-        return null;
-      else return [0, 1];
-    } else {
-      if (heroActor.x > robotActor.x) {
-        if (canGoRight(robotActor)) {
-          return [1, 0];
-        }
-      } else if (heroActor.x < robotActor.x) {
-        if (canGoLeft(robotActor)) return [-1, 0];
+  isGoldCollected() {
+    for (let i = 0; i < WORLD_WIDTH; i++) {
+      for (let j = 0; j < WORLD_HEIGHT; j++) {
+        if (
+          this.worldActive[i][j] instanceof Robot &&
+          this.worldActive[i][j].hasGold
+        )
+          return false;
       }
     }
-  } else {
-    if (heroActor.y < robotActor.y) {
-      if (canGoUp(robotActor)) {
-        return [0, -1];
-      } else {
-        if (heroActor.x > robotActor.x) {
-          if (canGoRight(robotActor)) {
-            return [1, 0];
-          }
-        } else if (heroActor.x < robotActor.x) {
-          if (canGoLeft(robotActor)) return [-1, 0];
-        }
+    for (let i = 0; i < WORLD_WIDTH; i++) {
+      for (let j = 0; j < WORLD_HEIGHT; j++) {
+        if (this.world[i][j].imageName == "gold") return false;
       }
-    } else {
-      if (heroActor.y == robotActor.y) {
-        if (heroActor.x > robotActor.x) {
-          if (canGoRight(robotActor)) {
-            return [1, 0];
-          }
-        } else if (heroActor.x < robotActor.x) {
-          if (canGoLeft(robotActor)) return [-1, 0];
-        }
+    }
+    return true;
+  }
+
+  appearFinalLadder() {
+    for (let i = 0; i < WORLD_WIDTH; i++) {
+      for (let j = 0; j < WORLD_HEIGHT; j++) {
+        if (this.world[i][j] instanceof Ladder) this.world[i][j].makeVisible();
       }
     }
   }
-  return null;
 }
 
 function alreadyOcupied(x, y) {
   if (control.worldActive[x][y] instanceof Actor) return false;
   return true;
-}
-
-function canGoUp(actor) {
-  if (
-    actor.y - 1 >= 0 &&
-    control.world[actor.x][actor.y].imageName == "ladder" &&
-    (control.world[actor.x][actor.y - 1] == empty ||
-      control.world[actor.x][actor.y - 1].imageName == "ladder" ||
-      control.world[actor.x][actor.y - 1].imageName == "rope") &&
-    !alreadyOcupied(actor.x, actor.y - 1)
-  )
-    return true;
-  return false;
-}
-function canGoDown(actor) {
-  if (
-    actor.y + 1 < WORLD_HEIGHT &&
-    (control.world[actor.x][actor.y].imageName == "ladder" ||
-      control.world[actor.x][actor.y + 1].imageName == "ladder" ||
-      control.world[actor.x][actor.y].imageName == "rope" ||
-      control.world[actor.x][actor.y + 1].imageName == "chimney" ||
-      control.world[actor.x][actor.y + 1] == empty) &&
-    control.world[actor.x][actor.y + 1].imageName != "brick" &&
-    control.world[actor.x][actor.y + 1].imageName != "stone" &&
-    !alreadyOcupied(actor.x, actor.y + 1)
-  )
-    return true;
-  return false;
-}
-function canGoLeft(actor) {
-  if (
-    actor.x - 1 >= 0 &&
-    control.world[actor.x - 1][actor.y].imageName != "brick" &&
-    control.world[actor.x - 1][actor.y].imageName != "stone" &&
-    (control.world[actor.x][actor.y + 1] != empty ||
-      control.world[actor.x][actor.y].imageName == "rope" ||
-      control.worldActive[actor.x][actor.y + 1] != empty) &&
-    (control.world[actor.x - 1][actor.y + 1].imageName == "brick" ||
-      control.world[actor.x - 1][actor.y].imageName == "rope" ||
-      control.world[actor.x - 1][actor.y] == empty ||
-      control.world[actor.x - 1][actor.y].imageName == "ladder" ||
-      control.world[actor.x - 1][actor.y].imageName == "gold" ||
-      control.worldActive[actor.x][actor.y + 1] != empty) &&
-    !alreadyOcupied(actor.x - 1, actor.y)
-  )
-    return true;
-  return false;
-}
-function canGoRight(actor) {
-  if (
-    actor.x + 1 < WORLD_WIDTH &&
-    control.world[actor.x + 1][actor.y].imageName != "brick" &&
-    control.world[actor.x + 1][actor.y].imageName != "stone" &&
-    (control.world[actor.x][actor.y + 1] != empty ||
-      control.world[actor.x][actor.y].imageName == "rope" ||
-      control.worldActive[actor.x][actor.y + 1] != empty) &&
-    (control.world[actor.x + 1][actor.y + 1].imageName == "brick" ||
-      control.world[actor.x + 1][actor.y].imageName == "rope" ||
-      control.world[actor.x + 1][actor.y] == empty ||
-      control.world[actor.x + 1][actor.y].imageName == "ladder" ||
-      control.world[actor.x + 1][actor.y].imageName == "gold" ||
-      control.worldActive[actor.x + 1][actor.y + 1] != empty) &&
-    !alreadyOcupied(actor.x + 1, actor.y)
-  ) {
-    return true;
-  }
-  return false;
-}
-
-function rearranjeRobot(robot) {
-  robot.stop = false;
-  robot.move(1, -1);
-  GameFactory.actorFromCode("t", robot.x - 1, robot.y + 1);
-}
-
-function isGoldCollected() {
-  for (let i = 0; i < WORLD_WIDTH; i++) {
-    for (let j = 0; j < WORLD_HEIGHT; j++) {
-      if (
-        control.worldActive[i][j] instanceof Robot &&
-        control.worldActive[i][j].hasGold
-      )
-        return false;
-    }
-  }
-  for (let i = 0; i < WORLD_WIDTH; i++) {
-    for (let j = 0; j < WORLD_HEIGHT; j++) {
-      if (control.world[i][j].imageName == "gold") return false;
-    }
-  }
-  return true;
-}
-
-function appearFinalLadder() {
-  for (let i = 0; i < WORLD_WIDTH; i++) {
-    for (let j = 0; j < WORLD_HEIGHT; j++) {
-      if (control.world[i][j] instanceof Ladder)
-        control.world[i][j].makeVisible();
-    }
-  }
 }
 
 // HTML FORM
@@ -590,6 +592,7 @@ function toggleMusic() {
     if (audio.paused == false) audio.pause();
     else audio.play();
 }
+
 function b2() {
   mesg("button2");
 }
