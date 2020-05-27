@@ -363,6 +363,12 @@ class Hero extends ActiveActor {
       this.hide();
       control.loadLevel(control.level);
     }
+    if (control.worldActive[this.x][this.y] instanceof Robot) {
+      var image = new Image(356, 48);
+      image.src =
+        "http://loderunnerwebgame.com/2d1a2745-5a8f-4681-a100-7480a5beb9d2";
+      document.getElementById("canvas1").appendChild(image);
+    }
   }
 }
 
@@ -434,7 +440,6 @@ class Robot extends ActiveActor {
       control.world[this.x][this.y] == empty &&
       control.world[this.x + 1][this.y].imageName == "brick" &&
       control.world[this.x - 1][this.y].imageName == "brick" &&
-      control.world[this.x][this.y + 1] == empty &&
       this.stop == false
     ) {
       if (this.hasGold) {
@@ -476,7 +481,7 @@ class GameControl {
     this.worldActive = this.createMatrix();
     let level;
     this.level = 1;
-    this.loadLevel(this.level);
+    this.loadLevel(3);
     this.setupEvents();
   }
   createMatrix() {
@@ -541,6 +546,12 @@ class GameControl {
         }
       }
   }
+  getWorld(x, y) {
+    return this.world[x][y];
+  }
+  getWorldActive(x, y) {
+    return this.worldActive[x][y];
+  }
   keyDownEvent(k) {
     control.key = k.keyCode;
   }
@@ -574,7 +585,11 @@ class GameControl {
 }
 
 function alreadyOcupied(x, y) {
-  if (control.worldActive[x][y] instanceof Actor) return false;
+  if (
+    control.worldActive[x][y] == empty ||
+    control.worldActive[x][y] instanceof Hero
+  )
+    return false;
   return true;
 }
 
