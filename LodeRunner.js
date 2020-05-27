@@ -355,9 +355,9 @@ function fall(actor) {
     else if (actor instanceof Hero) actor.imageName = "hero_falls_right";
     else actor.imageName = "robot_falls_right";
     actor.move(0, 1);
-    if (control.world[actor.x][actor.y + 1].imageName == "rope") {
-      actor.move(0, 1);
-    }
+  }
+  if (control.world[actor.x][actor.y + 1].imageName == "rope") {
+    actor.move(0, 1);
   }
 }
 
