@@ -96,6 +96,7 @@ class PassiveActor extends Actor {
 class ActiveActor extends Actor {
   constructor(x, y, imageName) {
     super(x, y, imageName);
+    let character = "Vilain";
     this.time = 0; // timestamp used in the control of the animations
   }
   show() {
@@ -130,8 +131,9 @@ class ActiveActor extends Actor {
     let curBlock = control.getWorld(this.x, this.y);
     let leftBlock = control.getWorld(this.x - 1, this.y);
     let belowBlock = control.getWorld(this.x, this.y + 1);
+    let belowBlockActive = control.getWorldActive(this.x, this.y + 1);
     if (this.x - 1 >= 0 && !control.alreadyOcupied(this.x - 1, this.y))
-      if (belowBlock.isWalkable()) {
+      if (belowBlock.isWalkable() || belowBlockActive.character == "Vilain") {
         if (leftBlock.isTraversable() || leftBlock.isGrabable()) return true;
       } else if (
         curBlock.isGrabable() &&
@@ -164,12 +166,13 @@ class ActiveActor extends Actor {
       !belowBlock.isWalkable() &&
       !belowBlock.isGrabable() &&
       !belowBlock.isClimbable() &&
-      !curBlock.isGrabable()
+      !curBlock.isGrabable() &&
+      !control.alreadyOcupied(this.x, this.y + 1)
     ) {
       if (this.y % 2 == 0)
-        if (this instanceof Hero) this.imageName = "hero_falls_left";
+        if (this.character == "Hero") this.imageName = "hero_falls_left";
         else this.imageName = "robot_falls_left";
-      else if (this instanceof Hero) this.imageName = "hero_falls_right";
+      else if (this.character == "Hero") this.imageName = "hero_falls_right";
       else this.imageName = "robot_falls_right";
       this.move(0, 1);
     }
@@ -181,10 +184,10 @@ class ActiveActor extends Actor {
   goUp() {
     if (this.canGoUp(this)) {
       if (this.y % 2 == 0) {
-        if (this instanceof Hero) this.imageName = "hero_on_ladder_right";
+        if (this.character == "Hero") this.imageName = "hero_on_ladder_right";
         else this.imageName = "robot_on_ladder_right";
       } else {
-        if (this instanceof Hero) this.imageName = "hero_on_ladder_left";
+        if (this.character == "Hero") this.imageName = "hero_on_ladder_left";
         else this.imageName = "robot_on_ladder_left";
       }
       this.move(0, -1);
@@ -194,10 +197,10 @@ class ActiveActor extends Actor {
   goDown() {
     if (this.canGoDown(this)) {
       if (this.y % 2 == 0) {
-        if (this instanceof Hero) this.imageName = "hero_on_ladder_right";
+        if (this.character == "Hero") this.imageName = "hero_on_ladder_right";
         else this.imageName = "robot_on_ladder_right";
       } else {
-        if (this instanceof Hero) this.imageName = "hero_on_ladder_left";
+        if (this.character == "Hero") this.imageName = "hero_on_ladder_left";
         else this.imageName = "robot_on_ladder_left";
       }
       this.move(0, 1);
@@ -206,16 +209,16 @@ class ActiveActor extends Actor {
 
   goRight() {
     if (this.canGoRight(this)) {
-      if (control.getWorld(this.x + 1, this.y) instanceof Rope) {
+      if (control.getWorld(this.x + 1, this.y).isGrabable()) {
         if (this.x % 2 == 0) {
-          if (this instanceof Hero) this.imageName = "hero_on_rope_left";
+          if (this.character == "Hero") this.imageName = "hero_on_rope_left";
           else this.imageName = "robot_on_rope_left";
         } else {
-          if (this instanceof Hero) this.imageName = "hero_on_rope_right";
+          if (this.character == "Hero") this.imageName = "hero_on_rope_right";
           else this.imageName = "robot_on_rope_right";
         }
       } else {
-        if (this instanceof Hero) this.imageName = "hero_runs_right";
+        if (this.character == "Hero") this.imageName = "hero_runs_right";
         else this.imageName = "robot_runs_right";
       }
       this.move(1, 0);
@@ -224,16 +227,16 @@ class ActiveActor extends Actor {
 
   goLeft() {
     if (this.canGoLeft(this)) {
-      if (control.getWorld(this.x - 1, this.y) instanceof Rope) {
+      if (control.getWorld(this.x - 1, this.y).isGrabable()) {
         if (this.x % 2 == 0) {
-          if (this instanceof Hero) hero.imageName = "hero_on_rope_left";
+          if (this.character == "Hero") hero.imageName = "hero_on_rope_left";
           else this.imageName = "robot_on_rope_left";
         } else {
-          if (this instanceof Hero) hero.imageName = "hero_on_rope_right";
+          if (this.character == "Hero") hero.imageName = "hero_on_rope_right";
           else this.imageName = "robot_on_rope_right";
         }
       } else {
-        if (this instanceof Hero) this.imageName = "hero_runs_left";
+        if (this.character == "Hero") this.imageName = "hero_runs_left";
         else this.imageName = "robot_runs_left";
       }
       this.move(-1, 0);
@@ -348,6 +351,7 @@ class Stone extends PassiveActor {
 class Hero extends ActiveActor {
   constructor(x, y) {
     super(x, y, "hero_runs_left");
+    this.character = "Hero";
     let verification;
     this.verification = 0;
     hero = this;
@@ -381,7 +385,7 @@ class Hero extends ActiveActor {
     }
     super.animation(k);
     //recolha do ouro
-    if (control.getWorld(this.x, this.y) instanceof Gold) {
+    if (control.getWorld(this.x, this.y).isCollectable()) {
       control.getWorld(this.x, this.y).hide();
       this.show();
     }
@@ -394,7 +398,7 @@ class Hero extends ActiveActor {
     if (
       control.isGoldCollected() &&
       this.y == 0 &&
-      control.getWorld(this.x, this.y) instanceof Ladder
+      control.getWorld(this.x, this.y).isClimbable()
     ) {
       control.level++;
       this.hide();
@@ -479,7 +483,7 @@ class Robot extends ActiveActor {
       }
       this.stop = true;
       control.world[this.x][this.y] = empty;
-      setTimeout(this.rearrangeRobot, 5000, this);
+      setTimeout(this.rearrangeRobot, 3800, this);
     }
     if (this.stop == false) {
       var k = this.robotMovement(hero, this);
@@ -592,7 +596,7 @@ class GameControl {
     for (let i = 0; i < WORLD_WIDTH; i++) {
       for (let j = 0; j < WORLD_HEIGHT; j++) {
         if (
-          this.worldActive[i][j] instanceof Robot &&
+          this.worldActive[i][j].character == "Vilain" &&
           this.worldActive[i][j].hasGold
         )
           return false;
@@ -607,18 +611,14 @@ class GameControl {
   }
 
   alreadyOcupied(x, y) {
-    if (
-      this.worldActive[x][y] == empty ||
-      this.worldActive[x][y] instanceof Hero
-    )
-      return false;
+    if (this.worldActive[x][y] == empty) return false;
     return true;
   }
 
   appearFinalLadder() {
     for (let i = 0; i < WORLD_WIDTH; i++) {
       for (let j = 0; j < WORLD_HEIGHT; j++) {
-        if (this.world[i][j] instanceof Ladder) this.world[i][j].makeVisible();
+        if (this.world[i][j].isClimbable()) this.world[i][j].makeVisible();
       }
     }
   }
