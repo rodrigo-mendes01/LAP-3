@@ -56,6 +56,15 @@ class Actor {
 }
 
 class PassiveActor extends Actor {
+  constructor(x, y, imageName) {
+    super(x, y, imageName);
+    let traversable = false;
+    let climbable = false;
+    let grabable = false;
+    let walkable = false;
+    let breakable = false;
+    let collectable = false;
+  }
   show() {
     control.world[this.x][this.y] = this;
     this.draw(this.x, this.y);
@@ -63,6 +72,24 @@ class PassiveActor extends Actor {
   hide() {
     control.world[this.x][this.y] = empty;
     empty.draw(this.x, this.y);
+  }
+  isTraversable() {
+    return this.traversable;
+  }
+  isClimbable() {
+    return this.climbable;
+  }
+  isGrabable() {
+    return this.grabable;
+  }
+  isWalkable() {
+    return this.walkable;
+  }
+  isBreakable() {
+    return this.breakable;
+  }
+  isCollectable() {
+    return this.collectable;
   }
 }
 
@@ -79,70 +106,65 @@ class ActiveActor extends Actor {
     control.worldActive[this.x][this.y] = empty;
     control.world[this.x][this.y].draw(this.x, this.y);
   }
-  //RESOLVER--------------------------------------
+
   canGoUp() {
+    let curBlock = control.getWorld(this.x, this.y);
+    let blockAbove = control.getWorld(this.x, this.y - 1);
     return (
-      this.y - 1 >= 0 &&
-      control.getWorld(this.x, this.y).imageName == "ladder" &&
-      (control.getWorld(this.x, this.y - 1) instanceof Empty ||
-        control.getWorld(this.x, this.y - 1).imageName == "ladder" ||
-        control.getWorld(this.x, this.y - 1) instanceof Rope) &&
+      curBlock.isClimbable() &&
+      (blockAbove.isClimbable() ||
+        blockAbove.isGrabable() ||
+        blockAbove.isTraversable()) &&
       !control.alreadyOcupied(this.x, this.y - 1)
     );
   }
 
   canGoDown() {
-    return !(
-      control.getWorld(this.x, this.y + 1) instanceof Brick ||
-      control.getWorld(this.x, this.y + 1) instanceof Stone ||
-      control.alreadyOcupied(this.x, this.y + 1)
-    );
-  }
-  //RESOLVER--------------------------------------
-  canGoLeft() {
+    let blockBelow = control.getWorld(this.x, this.y + 1);
     return (
-      this.x - 1 >= 0 &&
-      control.world[this.x - 1][this.y].imageName != "brick" &&
-      control.world[this.x - 1][this.y].imageName != "stone" &&
-      (control.world[this.x][this.y + 1] != empty ||
-        control.world[this.x][this.y].imageName == "rope" ||
-        control.worldActive[this.x][this.y + 1] != empty) &&
-      (control.world[this.x - 1][this.y + 1].imageName == "brick" ||
-        control.world[this.x - 1][this.y].imageName == "rope" ||
-        control.world[this.x - 1][this.y] == empty ||
-        control.world[this.x - 1][this.y].imageName == "ladder" ||
-        control.world[this.x - 1][this.y].imageName == "gold" ||
-        control.worldActive[this.x][this.y + 1] != empty) &&
-      !control.alreadyOcupied(this.x - 1, this.y)
-    );
-  }
-  //RESOLVER--------------------------------------
-  canGoRight() {
-    return (
-      this.x + 1 < WORLD_WIDTH &&
-      control.world[this.x - 1][this.y].imageName != "brick" &&
-      control.world[this.x - 1][this.y].imageName != "stone" &&
-      (control.world[this.x][this.y + 1] != empty ||
-        control.world[this.x][this.y].imageName == "rope" ||
-        control.worldActive[this.x][this.y + 1] != empty) &&
-      (control.world[this.x - 1][this.y + 1].imageName == "brick" ||
-        control.world[this.x - 1][this.y].imageName == "rope" ||
-        control.world[this.x - 1][this.y] == empty ||
-        control.world[this.x - 1][this.y].imageName == "ladder" ||
-        control.world[this.x - 1][this.y].imageName == "gold" ||
-        control.worldActive[this.x][this.y + 1] != empty) &&
-      !control.alreadyOcupied(this.x + 1, this.y)
+      blockBelow.isTraversable() && !control.alreadyOcupied(this.x, this.y + 1)
     );
   }
 
+  canGoLeft() {
+    let curBlock = control.getWorld(this.x, this.y);
+    let leftBlock = control.getWorld(this.x - 1, this.y);
+    let belowBlock = control.getWorld(this.x, this.y + 1);
+    if (this.x - 1 >= 0 && !control.alreadyOcupied(this.x - 1, this.y))
+      if (belowBlock.isWalkable()) {
+        if (leftBlock.isTraversable() || leftBlock.isGrabable()) return true;
+      } else if (
+        curBlock.isGrabable() &&
+        (leftBlock.isTraversable() || leftBlock.isGrabable())
+      )
+        return true;
+    return false;
+  }
+
+  canGoRight() {
+    let curBlock = control.getWorld(this.x, this.y);
+    let rightBlock = control.getWorld(this.x + 1, this.y);
+    let belowBlock = control.getWorld(this.x, this.y + 1);
+    if (this.x + 1 < WORLD_WIDTH && !control.alreadyOcupied(this.x + 1, this.y))
+      if (belowBlock.isWalkable()) {
+        if (rightBlock.isTraversable() || rightBlock.isGrabable()) return true;
+      } else if (
+        curBlock.isGrabable() &&
+        (rightBlock.isTraversable() || rightBlock.isGrabable())
+      )
+        return true;
+    return false;
+  }
+
   fall() {
+    let curBlock = control.getWorld(this.x, this.y);
+    let belowBlock = control.getWorld(this.x, this.y + 1);
     if (
-      this.y + 1 < WORLD_HEIGHT &&
-      (control.getWorld(this.x, this.y + 1) instanceof Empty ||
-        control.getWorld(this.x, this.y + 1) instanceof Gold) &&
-      !(control.getWorld(this.x, this.y) instanceof Rope) &&
-      !(control.getWorld(this.x, this.y) instanceof Ladder) &&
-      control.getWorldActive(this.x, this.y + 1) instanceof Empty
+      belowBlock.isTraversable() &&
+      !belowBlock.isWalkable() &&
+      !belowBlock.isGrabable() &&
+      !belowBlock.isClimbable() &&
+      !curBlock.isGrabable()
     ) {
       if (this.y % 2 == 0)
         if (this instanceof Hero) this.imageName = "hero_falls_left";
@@ -151,7 +173,7 @@ class ActiveActor extends Actor {
       else this.imageName = "robot_falls_right";
       this.move(0, 1);
     }
-    if (control.getWorld(this.x, this.y + 1) instanceof Rope) {
+    if (control.getWorld(this.x, this.y + 1).isGrabable()) {
       this.move(0, 1);
     }
   }
@@ -258,18 +280,23 @@ class ActiveActor extends Actor {
 class Brick extends PassiveActor {
   constructor(x, y) {
     super(x, y, "brick");
+    this.breakable = true;
+    this.walkable = true;
   }
 }
 
 class Chimney extends PassiveActor {
   constructor(x, y) {
     super(x, y, "chimney");
+    this.traversable = true;
+    this.walkable = true;
   }
 }
 
 class Empty extends PassiveActor {
   constructor() {
     super(-1, -1, "empty");
+    this.traversable = true;
   }
   show() {}
   hide() {}
@@ -278,6 +305,8 @@ class Empty extends PassiveActor {
 class Gold extends PassiveActor {
   constructor(x, y) {
     super(x, y, "gold");
+    this.traversable = true;
+    this.collectable = true;
   }
 }
 
@@ -290,6 +319,9 @@ class Invalid extends PassiveActor {
 class Ladder extends PassiveActor {
   constructor(x, y) {
     super(x, y, "empty");
+    this.traversable = true;
+    this.climbable = true;
+    this.walkable = true;
   }
   makeVisible() {
     this.imageName = "ladder";
@@ -300,12 +332,14 @@ class Ladder extends PassiveActor {
 class Rope extends PassiveActor {
   constructor(x, y) {
     super(x, y, "rope");
+    this.grabable = true;
   }
 }
 
 class Stone extends PassiveActor {
   constructor(x, y) {
     super(x, y, "stone");
+    this.walkable = true;
   }
 }
 
@@ -320,10 +354,19 @@ class Hero extends ActiveActor {
   }
 
   shoot() {
-    if (control.getWorld(this.x - 1, this.y + 1) instanceof Brick) {
-      this.imageName = "hero_shoots_left";
-      control.getWorld(this.x - 1, this.y + 1).hide();
-      setTimeout(GameFactory.actorFromCode, 5000, "t", this.x - 1, this.y + 1);
+    //shoot left
+    if (this.x - 1 >= 0 && this.y + 1 < WORLD_WIDTH) {
+      if (control.getWorld(this.x - 1, this.y + 1).isBreakable()) {
+        this.imageName = "hero_shoots_left";
+        control.getWorld(this.x - 1, this.y + 1).hide();
+        setTimeout(
+          GameFactory.actorFromCode,
+          5000,
+          "t",
+          this.x - 1,
+          this.y + 1
+        );
+      }
     }
   }
 
