@@ -9,22 +9,14 @@
 /*
 -------------------------------------------||-------------------------------------------
 TODO:
-<<<<<<< HEAD
-
-3-ladroes a apanhar o ouro, a largar quando caem 
-4-trocar o passar de nivel para dentro da class gamecontrol em vez de tar na funçao animiation
-5-fazer o choque entre atores ativos,ou seja nao se podem anular uns aos outros
-6-por na classe topo o que e da classe topo e tirar de la o q nao pode tar la
-7-queda dos ladroes entre dois blocos
-=======
   Bugs:
-    - Queda ladrão extremidades, impede feature do ouro
-    - Ladrões em cima uns dos outros, impede choque de atores
-    - Ladrão frozen depois regeneração
+    - Queda ladrão extremidades, impede feature do ouro -> Resolvido!
+    - Ladrões em cima uns dos outros, impede choque de atores 
+    - Ladrão frozen depois regeneração -> Resolvido!
 
   Refactors:
     - Mudar transição de nível de Hero para GameControl
-    - gets
+    - gets->Kinda feito!
   Features:
     - Imagem shoot
     - HTML melhorado
@@ -32,7 +24,6 @@ TODO:
       - Botão reset
       - Select level
     - Sons variados
->>>>>>> master
 -------------------------------------------||----------------------------------------------
 */
 
@@ -88,13 +79,13 @@ class ActiveActor extends Actor {
     control.worldActive[this.x][this.y] = empty;
     control.world[this.x][this.y].draw(this.x, this.y);
   }
-
+  //RESOLVER--------------------------------------
   canGoUp() {
     return (
       this.y - 1 >= 0 &&
-      control.getWorld(this.x, this.y) instanceof Ladder &&
+      control.getWorld(this.x, this.y).imageName == "ladder" &&
       (control.getWorld(this.x, this.y - 1) instanceof Empty ||
-        control.getWorld(this.x, this.y - 1) instanceof Ladder ||
+        control.getWorld(this.x, this.y - 1).imageName == "ladder" ||
         control.getWorld(this.x, this.y - 1) instanceof Rope) &&
       !control.alreadyOcupied(this.x, this.y - 1)
     );
@@ -107,24 +98,40 @@ class ActiveActor extends Actor {
       control.alreadyOcupied(this.x, this.y + 1)
     );
   }
-
+  //RESOLVER--------------------------------------
   canGoLeft() {
-    return !(
-      this.x - 1 < 0 ||
-      control.getWorld(this.x - 1, this.y) instanceof Brick ||
-      control.getWorld(this.x - 1, this.y) instanceof Stone ||
-      control.getWorld(this.x - 1, this.y) instanceof Chimney ||
-      control.alreadyOcupied(this.x - 1, this.y)
+    return (
+      this.x - 1 >= 0 &&
+      control.world[this.x - 1][this.y].imageName != "brick" &&
+      control.world[this.x - 1][this.y].imageName != "stone" &&
+      (control.world[this.x][this.y + 1] != empty ||
+        control.world[this.x][this.y].imageName == "rope" ||
+        control.worldActive[this.x][this.y + 1] != empty) &&
+      (control.world[this.x - 1][this.y + 1].imageName == "brick" ||
+        control.world[this.x - 1][this.y].imageName == "rope" ||
+        control.world[this.x - 1][this.y] == empty ||
+        control.world[this.x - 1][this.y].imageName == "ladder" ||
+        control.world[this.x - 1][this.y].imageName == "gold" ||
+        control.worldActive[this.x][this.y + 1] != empty) &&
+      !control.alreadyOcupied(this.x - 1, this.y)
     );
   }
-
+  //RESOLVER--------------------------------------
   canGoRight() {
-    return !(
-      this.x + 1 > WORLD_WIDTH ||
-      control.getWorld(this.x + 1, this.y) instanceof Brick ||
-      control.getWorld(this.x + 1, this.y) instanceof Stone ||
-      control.getWorld(this.x + 1, this.y) instanceof Chimney ||
-      control.alreadyOcupied(this.x + 1, this.y)
+    return (
+      this.x + 1 < WORLD_WIDTH &&
+      control.world[this.x - 1][this.y].imageName != "brick" &&
+      control.world[this.x - 1][this.y].imageName != "stone" &&
+      (control.world[this.x][this.y + 1] != empty ||
+        control.world[this.x][this.y].imageName == "rope" ||
+        control.worldActive[this.x][this.y + 1] != empty) &&
+      (control.world[this.x - 1][this.y + 1].imageName == "brick" ||
+        control.world[this.x - 1][this.y].imageName == "rope" ||
+        control.world[this.x - 1][this.y] == empty ||
+        control.world[this.x - 1][this.y].imageName == "ladder" ||
+        control.world[this.x - 1][this.y].imageName == "gold" ||
+        control.worldActive[this.x][this.y + 1] != empty) &&
+      !control.alreadyOcupied(this.x + 1, this.y)
     );
   }
 
@@ -365,16 +372,10 @@ class Robot extends ActiveActor {
     var stop;
     this.stop = false;
   }
-<<<<<<< HEAD
-  robotMovement(heroActor, robotActor) {
-    if (heroActor.y > robotActor.y) {
-      if (super.canGoDown(robotActor)) {
-=======
 
   robotMovement() {
     if (hero.y > this.y) {
       if (super.canGoDown(this)) {
->>>>>>> master
         if (
           control.getWorld(this.x, this.y + 1) == empty &&
           control.world[this.x][this.y].imageName != "rope" &&
@@ -434,12 +435,8 @@ class Robot extends ActiveActor {
         this.hasGold = false;
       }
       this.stop = true;
-      control.world[this.x][this.y] == empty;
-<<<<<<< HEAD
-      setTimeout(this.rearranjeRobot, 4500, this);
-=======
+      control.world[this.x][this.y] = empty;
       setTimeout(this.rearrangeRobot, 5000, this);
->>>>>>> master
     }
     if (this.stop == false) {
       var k = this.robotMovement(hero, this);
@@ -453,7 +450,7 @@ class Robot extends ActiveActor {
   }
 
   rearrangeRobot(robot) {
-    this.stop = false;
+    robot.stop = false;
     robot.move(1, -1);
     GameFactory.actorFromCode("t", robot.x - 1, robot.y + 1);
   }
