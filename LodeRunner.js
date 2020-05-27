@@ -10,7 +10,6 @@
 -------------------------------------------||-------------------------------------------
 TODO:
 
-2-ladrões a mexer(pensar num algoritmo para seguir)
 3-ladroes a apanhar o ouro, a largar quando caem 
 4-trocar o passar de nivel para dentro da class gamecontrol em vez de tar na funçao animiation
 5-fazer o choque entre atores ativos,ou seja nao se podem anular uns aos outros
@@ -378,7 +377,6 @@ class Robot extends ActiveActor {
     var stop;
     this.stop = false;
   }
-
   robotMovement(heroActor, robotActor) {
     if (heroActor.y > robotActor.y) {
       if (super.canGoDown(robotActor)) {
@@ -442,7 +440,7 @@ class Robot extends ActiveActor {
       }
       this.stop = true;
       control.world[this.x][this.y] == empty;
-      setTimeout(rearranjeRobot, 5000, this);
+      setTimeout(this.rearranjeRobot, 4500, this);
     }
     if (this.stop == false) {
       var k = this.robotMovement(hero, this);
