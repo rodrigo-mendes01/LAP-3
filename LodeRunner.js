@@ -12,10 +12,11 @@ TODO:
   Bugs:
     - Queda ladrão extremidades, impede feature do ouro
     - Ladrões em cima uns dos outros, impede choque de atores
-  
+    - Ladrão frozen depois regeneração
+
   Refactors:
     - Mudar transição de nível de Hero para GameControl
-
+    - gets
   Features:
     - Imagem shoot
     - HTML melhorado
@@ -80,83 +81,52 @@ class ActiveActor extends Actor {
   }
 
   canGoUp() {
-    if (
+    return (
       this.y - 1 >= 0 &&
-      control.world[this.x][this.y].imageName == "ladder" &&
-      (control.world[this.x][this.y - 1] == empty ||
-        control.world[this.x][this.y - 1].imageName == "ladder" ||
-        control.world[this.x][this.y - 1].imageName == "rope") &&
+      control.getWorld(this.x, this.y) instanceof Ladder &&
+      (control.getWorld(this.x, this.y - 1) instanceof Empty ||
+        control.getWorld(this.x, this.y - 1) instanceof Ladder ||
+        control.getWorld(this.x, this.y - 1) instanceof Rope) &&
       !control.alreadyOcupied(this.x, this.y - 1)
-    )
-      return true;
-    return false;
+    );
   }
 
   canGoDown() {
-    if (
-      this.y + 1 < WORLD_HEIGHT &&
-      (control.world[this.x][this.y].imageName == "ladder" ||
-        control.world[this.x][this.y + 1].imageName == "ladder" ||
-        control.world[this.x][this.y].imageName == "rope" ||
-        control.world[this.x][this.y + 1].imageName == "chimney" ||
-        control.world[this.x][this.y + 1] == empty) &&
-      control.world[this.x][this.y + 1].imageName != "brick" &&
-      control.world[this.x][this.y + 1].imageName != "stone" &&
-      !control.alreadyOcupied(this.x, this.y + 1)
-    )
-      return true;
-    return false;
+    return !(
+      control.getWorld(this.x, this.y + 1) instanceof Brick ||
+      control.getWorld(this.x, this.y + 1) instanceof Stone ||
+      control.alreadyOcupied(this.x, this.y + 1)
+    );
   }
 
   canGoLeft() {
-    if (
-      this.x - 1 >= 0 &&
-      control.world[this.x - 1][this.y].imageName != "brick" &&
-      control.world[this.x - 1][this.y].imageName != "stone" &&
-      (control.world[this.x][this.y + 1] != empty ||
-        control.world[this.x][this.y].imageName == "rope" ||
-        control.worldActive[this.x][this.y + 1] != empty) &&
-      (control.world[this.x - 1][this.y + 1].imageName == "brick" ||
-        control.world[this.x - 1][this.y].imageName == "rope" ||
-        control.world[this.x - 1][this.y] == empty ||
-        control.world[this.x - 1][this.y].imageName == "ladder" ||
-        control.world[this.x - 1][this.y].imageName == "gold" ||
-        control.worldActive[this.x][this.y + 1] != empty) &&
-      !control.alreadyOcupied(this.x - 1, this.y)
-    )
-      return true;
-    return false;
+    return !(
+      this.x - 1 < 0 ||
+      control.getWorld(this.x - 1, this.y) instanceof Brick ||
+      control.getWorld(this.x - 1, this.y) instanceof Stone ||
+      control.getWorld(this.x - 1, this.y) instanceof Chimney ||
+      control.alreadyOcupied(this.x - 1, this.y)
+    );
   }
 
   canGoRight() {
-    if (
-      this.x + 1 < WORLD_WIDTH &&
-      control.world[this.x + 1][this.y].imageName != "brick" &&
-      control.world[this.x + 1][this.y].imageName != "stone" &&
-      (control.world[this.x][this.y + 1] != empty ||
-        control.world[this.x][this.y].imageName == "rope" ||
-        control.worldActive[this.x][this.y + 1] != empty) &&
-      (control.world[this.x + 1][this.y + 1].imageName == "brick" ||
-        control.world[this.x + 1][this.y].imageName == "rope" ||
-        control.world[this.x + 1][this.y] == empty ||
-        control.world[this.x + 1][this.y].imageName == "ladder" ||
-        control.world[this.x + 1][this.y].imageName == "gold" ||
-        control.worldActive[this.x + 1][this.y + 1] != empty) &&
-      !control.alreadyOcupied(this.x + 1, this.y)
-    ) {
-      return true;
-    }
-    return false;
+    return !(
+      this.x + 1 > WORLD_WIDTH ||
+      control.getWorld(this.x + 1, this.y) instanceof Brick ||
+      control.getWorld(this.x + 1, this.y) instanceof Stone ||
+      control.getWorld(this.x + 1, this.y) instanceof Chimney ||
+      control.alreadyOcupied(this.x + 1, this.y)
+    );
   }
 
   fall() {
     if (
       this.y + 1 < WORLD_HEIGHT &&
-      (control.world[this.x][this.y + 1] == empty ||
-        control.world[this.x][this.y + 1].imageName == "gold") &&
-      control.world[this.x][this.y].imageName != "rope" &&
-      control.world[this.x][this.y].imageName != "ladder" &&
-      control.worldActive[this.x][this.y + 1] == empty
+      (control.getWorld(this.x, this.y + 1) instanceof Empty ||
+        control.getWorld(this.x, this.y + 1) instanceof Gold) &&
+      !(control.getWorld(this.x, this.y) instanceof Rope) &&
+      !(control.getWorld(this.x, this.y) instanceof Ladder) &&
+      control.getWorldActive(this.x, this.y + 1) instanceof Empty
     ) {
       if (this.y % 2 == 0)
         if (this instanceof Hero) this.imageName = "hero_falls_left";
@@ -165,7 +135,7 @@ class ActiveActor extends Actor {
       else this.imageName = "robot_falls_right";
       this.move(0, 1);
     }
-    if (control.world[this.x][this.y + 1].imageName == "rope") {
+    if (control.getWorld(this.x, this.y + 1) instanceof Rope) {
       this.move(0, 1);
     }
   }
@@ -198,7 +168,7 @@ class ActiveActor extends Actor {
 
   goRight() {
     if (this.canGoRight(this)) {
-      if (control.world[this.x + 1][this.y].imageName == "rope") {
+      if (control.getWorld(this.x + 1, this.y) instanceof Rope) {
         if (this.x % 2 == 0) {
           if (this instanceof Hero) this.imageName = "hero_on_rope_left";
           else this.imageName = "robot_on_rope_left";
@@ -216,7 +186,7 @@ class ActiveActor extends Actor {
 
   goLeft() {
     if (this.canGoLeft(this)) {
-      if (control.world[this.x - 1][this.y].imageName == "rope") {
+      if (control.getWorld(this.x - 1, this.y) instanceof Rope) {
         if (this.x % 2 == 0) {
           if (this instanceof Hero) hero.imageName = "hero_on_rope_left";
           else this.imageName = "robot_on_rope_left";
@@ -235,7 +205,7 @@ class ActiveActor extends Actor {
   animation(k) {
     switch (k) {
       case " ":
-        this.shoot(this);
+        this.shoot();
         break;
       case null:
         this.fall(this);
@@ -333,11 +303,11 @@ class Hero extends ActiveActor {
     hero = this;
   }
 
-  shoot(hero) {
-    if (control.world[hero.x - 1][hero.y + 1].imageName == "brick") {
-      hero.imageName = "hero_shoots_left";
-      control.world[hero.x - 1][hero.y + 1].hide();
-      setTimeout(GameFactory.actorFromCode, 5000, "t", hero.x - 1, hero.y + 1);
+  shoot() {
+    if (control.getWorld(this.x - 1, this.y + 1) instanceof Brick) {
+      this.imageName = "hero_shoots_left";
+      control.getWorld(this.x - 1, this.y + 1).hide();
+      setTimeout(GameFactory.actorFromCode, 5000, "t", this.x - 1, this.y + 1);
     }
   }
 
@@ -352,8 +322,8 @@ class Hero extends ActiveActor {
     }
     super.animation(k);
     //recolha do ouro
-    if (control.world[this.x][this.y].imageName == "gold") {
-      control.world[this.x][this.y].hide();
+    if (control.getWorld(this.x, this.y) instanceof Gold) {
+      control.getWorld(this.x, this.y).hide();
       this.show();
     }
     if (control.isGoldCollected() && this.verification == 0) {
@@ -365,7 +335,7 @@ class Hero extends ActiveActor {
     if (
       control.isGoldCollected() &&
       this.y == 0 &&
-      control.world[this.x][this.y].imageName == "ladder"
+      control.getWorld(this.x, this.y) instanceof Ladder
     ) {
       control.level++;
       this.hide();
@@ -391,7 +361,7 @@ class Robot extends ActiveActor {
     if (hero.y > this.y) {
       if (super.canGoDown(this)) {
         if (
-          control.world[this.x][this.y + 1] == empty &&
+          control.getWorld(this.x, this.y + 1) == empty &&
           control.world[this.x][this.y].imageName != "rope" &&
           control.world[this.x][this.y].imageName != "ladder"
         )
@@ -483,7 +453,7 @@ class GameControl {
     this.worldActive = this.createMatrix();
     let level;
     this.level = 1;
-    this.loadLevel(3);
+    this.loadLevel(this.level);
     this.setupEvents();
   }
   createMatrix() {
