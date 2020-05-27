@@ -21,7 +21,7 @@ TODO:
 
 // Autores: Rodrigo Mendes (55308), Tomás Silva (55749)
 
-let empty, hero, control;
+let empty, hero, control, audio;
 
 // ACTORS
 
@@ -173,6 +173,13 @@ class Hero extends ActiveActor {
   }
   animation() {
     var k = control.getKey();
+    if (k != null && audio == null) {
+      audio = new Audio(
+        "http://ctp.di.fct.unl.pt/miei/lap/projs/proj2020-3/files/louiscole.m4a"
+      );
+      audio.loop = true;
+      audio.play();
+    }
     super.animation(k);
     //recolha do ouro
     if (control.world[this.x][this.y].imageName == "gold") {
