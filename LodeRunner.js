@@ -188,14 +188,7 @@ class Hero extends ActiveActor {
     }
     if (isGoldCollected() && this.verification == 0) {
       this.verification = 1;
-      let x = firstEmptyX();
-      for (
-        let j = 0;
-        control.world[firstEmptyX()][j].imageName != "brick";
-        j++
-      ) {
-        GameFactory.actorFromCode("e", x, j);
-      }
+      appearFinalLadder();
     }
     //da um nivel novo depois dos requesitos anteriores
     if (
@@ -223,6 +216,7 @@ class Robot extends ActiveActor {
     this.stop = false;
   }
   animation() {
+    if (this.time % 2 == 0) return;
     if (
       this.x > 0 &&
       this.x < WORLD_WIDTH - 1 &&
@@ -347,21 +341,20 @@ function shoot(h) {
 
 function fall(actor) {
   // TODO: corrigir bug hold on air
-  if (actor.y + 1 < WORLD_HEIGHT) {
-    if (
-      (control.world[actor.x][actor.y + 1] == empty ||
-        control.world[actor.x][actor.y + 1].imageName == "gold") &&
-      control.world[actor.x][actor.y].imageName != "rope" &&
-      control.world[actor.x][actor.y].imageName != "ladder" &&
-      control.worldActive[actor.x][actor.y + 1] == empty
-    ) {
-      if (actor.y % 2 == 0)
-        if (actor instanceof Hero) actor.imageName = "hero_falls_left";
-        else actor.imageName = "robot_falls_left";
-      else if (actor instanceof Hero) actor.imageName = "hero_falls_right";
-      else actor.imageName = "robot_falls_right";
-      actor.move(0, 1);
-    }
+  if (
+    actor.y + 1 < WORLD_HEIGHT &&
+    (control.world[actor.x][actor.y + 1] == empty ||
+      control.world[actor.x][actor.y + 1].imageName == "gold") &&
+    control.world[actor.x][actor.y].imageName != "rope" &&
+    control.world[actor.x][actor.y].imageName != "ladder" &&
+    control.worldActive[actor.x][actor.y + 1] == empty
+  ) {
+    if (actor.y % 2 == 0)
+      if (actor instanceof Hero) actor.imageName = "hero_falls_left";
+      else actor.imageName = "robot_falls_left";
+    else if (actor instanceof Hero) actor.imageName = "hero_falls_right";
+    else actor.imageName = "robot_falls_right";
+    actor.move(0, 1);
     if (control.world[actor.x][actor.y + 1].imageName == "rope") {
       actor.move(0, 1);
     }
@@ -575,9 +568,12 @@ function isGoldCollected() {
   return true;
 }
 
-function firstEmptyX() {
+function appearFinalLadder() {
   for (let i = 0; i < WORLD_WIDTH; i++) {
-    if (control.world[i][0] == empty) return i;
+    for (let j = 0; j < WORLD_HEIGHT; j++) {
+      if (control.world[i][j] instanceof Ladder)
+        control.world[i][j].makeVisible();
+    }
   }
 }
 
