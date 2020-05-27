@@ -200,12 +200,6 @@ class Hero extends ActiveActor {
       this.hide();
       control.loadLevel(control.level);
     }
-    if (control.worldActive[this.x][this.y] instanceof Robot) {
-      var image = new Image(356, 48);
-      image.src =
-        "http://loderunnerwebgame.com/2d1a2745-5a8f-4681-a100-7480a5beb9d2";
-      document.getElementById("canvas1").appendChild(image);
-    }
   }
 }
 
