@@ -79,7 +79,7 @@ class ActiveActor extends Actor {
       (control.world[actor.x][actor.y - 1] == empty ||
         control.world[actor.x][actor.y - 1].imageName == "ladder" ||
         control.world[actor.x][actor.y - 1].imageName == "rope") &&
-      !alreadyOcupied(actor.x, actor.y - 1)
+      !control.alreadyOcupied(actor.x, actor.y - 1)
     )
       return true;
     return false;
@@ -95,7 +95,7 @@ class ActiveActor extends Actor {
         control.world[actor.x][actor.y + 1] == empty) &&
       control.world[actor.x][actor.y + 1].imageName != "brick" &&
       control.world[actor.x][actor.y + 1].imageName != "stone" &&
-      !alreadyOcupied(actor.x, actor.y + 1)
+      !control.alreadyOcupied(actor.x, actor.y + 1)
     )
       return true;
     return false;
@@ -115,7 +115,7 @@ class ActiveActor extends Actor {
         control.world[actor.x - 1][actor.y].imageName == "ladder" ||
         control.world[actor.x - 1][actor.y].imageName == "gold" ||
         control.worldActive[actor.x][actor.y + 1] != empty) &&
-      !alreadyOcupied(actor.x - 1, actor.y)
+      !control.alreadyOcupied(actor.x - 1, actor.y)
     )
       return true;
     return false;
@@ -135,7 +135,7 @@ class ActiveActor extends Actor {
         control.world[actor.x + 1][actor.y].imageName == "ladder" ||
         control.world[actor.x + 1][actor.y].imageName == "gold" ||
         control.worldActive[actor.x + 1][actor.y + 1] != empty) &&
-      !alreadyOcupied(actor.x + 1, actor.y)
+      !control.alreadyOcupied(actor.x + 1, actor.y)
     ) {
       return true;
     }
@@ -461,7 +461,7 @@ class Robot extends ActiveActor {
     }
   }
 
-  rearranjeRobot(robot) {
+  rearrangeRobot(robot) {
     robot.stop = false;
     robot.move(1, -1);
     GameFactory.actorFromCode("t", robot.x - 1, robot.y + 1);
@@ -575,6 +575,15 @@ class GameControl {
     return true;
   }
 
+  alreadyOcupied(x, y) {
+    if (
+      this.worldActive[x][y] == empty ||
+      this.worldActive[x][y] instanceof Hero
+    )
+      return false;
+    return true;
+  }
+
   appearFinalLadder() {
     for (let i = 0; i < WORLD_WIDTH; i++) {
       for (let j = 0; j < WORLD_HEIGHT; j++) {
@@ -582,15 +591,6 @@ class GameControl {
       }
     }
   }
-}
-
-function alreadyOcupied(x, y) {
-  if (
-    control.worldActive[x][y] == empty ||
-    control.worldActive[x][y] instanceof Hero
-  )
-    return false;
-  return true;
 }
 
 // HTML FORM
