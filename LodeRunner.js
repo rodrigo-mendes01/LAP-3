@@ -521,8 +521,8 @@ class Robot extends ActiveActor {
       if (super.canGoDown(this)) {
         if (
           control.getWorld(this.x, this.y + 1) == empty &&
-          control.world[this.x][this.y].imageName != "rope" &&
-          control.world[this.x][this.y].imageName != "ladder"
+          !control.world(this.x, this.y).isClimbable() &&
+          !control.world(this.x, this.y).isGrabable()
         )
           return null;
         else return [0, 1];
@@ -582,8 +582,8 @@ class Robot extends ActiveActor {
     if (this.stop == false) {
       var k = this.robotMovement(hero, this);
       super.animation(k);
-      if (control.world[this.x][this.y].imageName == "gold" && !this.hasGold) {
-        control.world[this.x][this.y].hide();
+      if (control.getWorld(this.x, this.y).isCollectable() && !this.hasGold) {
+        control.getWorld(this.x, this.y).hide();
         this.hasGold = true;
         this.show();
       }
@@ -668,7 +668,7 @@ class GameControl {
     control.time++;
     for (let x = 0; x < WORLD_WIDTH; x++)
       for (let y = 0; y < WORLD_HEIGHT; y++) {
-        let a = control.worldActive[x][y];
+        let a = control.getWorldActive(x, y);
         if (a.time < control.time) {
           a.time = control.time;
           a.animation();
