@@ -87,8 +87,6 @@ class PassiveActor extends Actor {
   isCollectable() {
     return this.collectable;
   }
-
-  //teste
 }
 
 class ActiveActor extends Actor {
@@ -694,6 +692,15 @@ class GameControl {
     }
   }
 
+  resetMap() {
+    for (let i = 0; i < WORLD_WIDTH; i++) {
+      for (let j = 0; j < WORLD_HEIGHT; j++) {
+        this.getWorld(i, j).hide();
+        this.getWorldActive(i, j).hide();
+      }
+    }
+  }
+
   endGameVerification() {
     if (
       hero.isGoldCollected() &&
@@ -702,6 +709,7 @@ class GameControl {
     ) {
       this.level++;
       hero.hide();
+      this.resetMap();
       this.loadLevel(this.level);
     }
   }
