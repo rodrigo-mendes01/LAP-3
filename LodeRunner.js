@@ -9,9 +9,9 @@
 /*
 -------------------------------------------||-------------------------------------------
 TODO:
-  Bugs:
-    - Ladrão cai no buraco com corda por baixo e não fica preso
+  
   Features:
+    - Morte do herói
     - HTML melhorado
       - Pontos
       - Botão reset
@@ -150,8 +150,9 @@ class ActiveActor extends Actor {
       if (belowBlock.isWalkable() || belowBlockActive.character == "Villain") {
         if (leftBlock.isTraversable() || leftBlock.isGrabable()) return true;
       } else if (
-        curBlock.isGrabable() &&
-        (leftBlock.isTraversable() || leftBlock.isGrabable())
+        (curBlock.isGrabable() &&
+          (leftBlock.isTraversable() || leftBlock.isGrabable())) ||
+        curBlock.isClimbable()
       )
         return true;
       return false;
@@ -174,8 +175,9 @@ class ActiveActor extends Actor {
       if (belowBlock.isWalkable() || belowBlockActive.character == "Villain") {
         if (rightBlock.isTraversable() || rightBlock.isGrabable()) return true;
       } else if (
-        curBlock.isGrabable() &&
-        (rightBlock.isTraversable() || rightBlock.isGrabable())
+        (curBlock.isGrabable() &&
+          (rightBlock.isTraversable() || rightBlock.isGrabable())) ||
+        curBlock.isClimbable()
       )
         return true;
       return false;
@@ -187,11 +189,13 @@ class ActiveActor extends Actor {
     let curBlock = control.getWorld(this.x, this.y);
     let belowBlock = control.getWorld(this.x, this.y + 1);
     if (
+      this.y + 1 < WORLD_HEIGHT &&
       belowBlock.isTraversable() &&
       !belowBlock.isWalkable() &&
       !belowBlock.isGrabable() &&
       !belowBlock.isClimbable() &&
       !curBlock.isGrabable() &&
+      !curBlock.isClimbable() &&
       !control.alreadyOcupied(this.x, this.y + 1)
     ) {
       if (this.y % 2 == 0)
@@ -202,6 +206,15 @@ class ActiveActor extends Actor {
       this.move(0, 1);
     }
     if (
+      this.character == "Villain" &&
+      this.y + 1 < WORLD_HEIGHT &&
+      !control.getWorld(this.x, this.y).isBroken() &&
+      control.getWorld(this.x, this.y + 1).isGrabable()
+    ) {
+      this.move(0, 1);
+    }
+    if (
+      this.character == "Hero" &&
       this.y + 1 < WORLD_HEIGHT &&
       control.getWorld(this.x, this.y + 1).isGrabable()
     ) {
@@ -397,6 +410,7 @@ class Hero extends ActiveActor {
     hero = this;
     this.character = "Hero";
     let lastPosition = "left";
+    let died = false;
   }
 
   shoot() {
@@ -431,7 +445,7 @@ class Hero extends ActiveActor {
     //shoots right
     else {
       if (
-        this.x + 1 < WORLD_WIDTH - 1 &&
+        this.x + 1 < WORLD_WIDTH &&
         this.y + 1 < WORLD_HEIGHT &&
         this.lastPosition == "right"
       ) {
@@ -499,6 +513,21 @@ class Hero extends ActiveActor {
       control.appearFinalLadder();
     }
     control.endGameVerification();
+    if (this.isDead()) {
+      //DO SOMETHING_____-------------------------------------------------------------------------------------------------------
+      //IMPORTANTE--------------------------------------------------------------------------------------------------------------
+    }
+  }
+  isDead() {
+    for (let i = 0; i < WORLD_WIDTH; i++) {
+      for (let j = 0; j < WORLD_HEIGHT; j++) {
+        let a = control.getWorldActive(i, j);
+        if (a.character == "Villain") {
+          if (i == this.x && this.y == j) this.died = true;
+        }
+      }
+    }
+    return this.died;
   }
 }
 
@@ -695,8 +724,8 @@ class GameControl {
   keyUpEvent(k) {}
 
   alreadyOcupied(x, y) {
-    if (this.getWorldActive(x, y) instanceof Empty) return false;
-    return true;
+    if (this.getWorldActive(x, y).character == "Villain") return true;
+    return false;
   }
 
   appearFinalLadder() {
