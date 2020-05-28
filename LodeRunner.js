@@ -10,15 +10,11 @@
 -------------------------------------------||-------------------------------------------
 TODO:
   Bugs:
-    - Queda ladrão extremidades, impede feature do ouro -> Resolvido!
-    - Ladrões em cima uns dos outros, impede choque de atores 
-    - Ladrão frozen depois regeneração -> Resolvido!
-
+    - Ladrão cai no buraco com corda por baixo e não fica preso
   Refactors:
     - Mudar transição de nível de Hero para GameControl
-    - gets->Kinda feito!
+    - Reformulação de shoot
   Features:
-    - Imagem shoot
     - HTML melhorado
       - Pontos
       - Botão reset
@@ -400,8 +396,27 @@ class Hero extends ActiveActor {
     }
   }
 
+  isGoldCollected() {
+    for (let i = 0; i < WORLD_WIDTH; i++) {
+      for (let j = 0; j < WORLD_HEIGHT; j++) {
+        if (
+          control.getWorldActive(i, j).character == "Villain" &&
+          control.getWorldActive(i, j).hasGold
+        )
+          return false;
+      }
+    }
+    for (let i = 0; i < WORLD_WIDTH; i++) {
+      for (let j = 0; j < WORLD_HEIGHT; j++) {
+        if (control.getWorld(i, j).isCollectable()) return false;
+      }
+    }
+    return true;
+  }
+
   animation() {
     var k = control.getKey();
+    // mudar audio para game control
     if (k != null && audio == null) {
       audio = new Audio(
         "http://ctp.di.fct.unl.pt/miei/lap/projs/proj2020-3/files/louiscole.m4a"
@@ -415,21 +430,11 @@ class Hero extends ActiveActor {
       control.getWorld(this.x, this.y).hide();
       this.show();
     }
-    if (control.isGoldCollected() && this.verification == 0) {
+    if (this.isGoldCollected() && this.verification == 0) {
       this.verification = 1;
       control.appearFinalLadder();
     }
-    //da um nivel novo depois dos requisitos anteriores
-    // mudar para game control
-    if (
-      control.isGoldCollected() &&
-      this.y == 0 &&
-      control.getWorld(this.x, this.y).isClimbable()
-    ) {
-      control.level++;
-      this.hide();
-      control.loadLevel(control.level);
-    }
+    control.endGameVerification();
   }
 }
 
@@ -627,34 +632,29 @@ class GameControl {
 
   keyUpEvent(k) {}
 
-  isGoldCollected() {
-    for (let i = 0; i < WORLD_WIDTH; i++) {
-      for (let j = 0; j < WORLD_HEIGHT; j++) {
-        if (
-          this.worldActive[i][j].character == "Vilain" &&
-          this.worldActive[i][j].hasGold
-        )
-          return false;
-      }
-    }
-    for (let i = 0; i < WORLD_WIDTH; i++) {
-      for (let j = 0; j < WORLD_HEIGHT; j++) {
-        if (this.world[i][j].imageName == "gold") return false;
-      }
-    }
-    return true;
-  }
-
   alreadyOcupied(x, y) {
-    if (this.worldActive[x][y] == empty) return false;
+    if (this.getWorldActive(x, y) instanceof Empty) return false;
     return true;
   }
 
   appearFinalLadder() {
     for (let i = 0; i < WORLD_WIDTH; i++) {
       for (let j = 0; j < WORLD_HEIGHT; j++) {
-        if (this.world[i][j].isClimbable()) this.world[i][j].makeVisible();
+        if (this.getWorld(i, j).isClimbable())
+          this.getWorld(i, j).makeVisible();
       }
+    }
+  }
+
+  endGameVerification() {
+    if (
+      hero.isGoldCollected() &&
+      hero.y == 0 &&
+      this.getWorld(hero.x, hero.y).isClimbable()
+    ) {
+      this.level++;
+      hero.hide();
+      this.loadLevel(this.level);
     }
   }
 }
