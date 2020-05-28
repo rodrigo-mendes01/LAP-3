@@ -87,6 +87,8 @@ class PassiveActor extends Actor {
   isCollectable() {
     return this.collectable;
   }
+
+  //teste
 }
 
 class ActiveActor extends Actor {
