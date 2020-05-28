@@ -10,9 +10,7 @@
 -------------------------------------------||-------------------------------------------
 TODO:
   Bugs:
-    - Queda ladrão extremidades, impede feature do ouro -> Resolvido!
-    - Ladrões em cima uns dos outros, impede choque de atores 
-    - Ladrão frozen depois regeneração -> Resolvido!
+    
 
   Refactors:
     - Mudar transição de nível de Hero para GameControl
@@ -248,6 +246,7 @@ class ActiveActor extends Actor {
         else this.imageName = "robot_runs_right";
       }
       this.move(1, 0);
+      this.lastPosition = "right";
     }
   }
 
@@ -266,6 +265,7 @@ class ActiveActor extends Actor {
         else this.imageName = "robot_runs_left";
       }
       this.move(-1, 0);
+      this.lastPosition = "left";
     }
   }
 
@@ -318,7 +318,6 @@ class Chimney extends PassiveActor {
   constructor(x, y) {
     super(x, y, "chimney");
     this.traversable = true;
-    this.walkable = true;
   }
 }
 
@@ -381,12 +380,20 @@ class Hero extends ActiveActor {
     this.verification = 0;
     hero = this;
     this.character = "Hero";
+    let lastPosition = "left";
   }
 
   shoot() {
     //shoot left
-    if (this.x - 1 >= 0 && this.y + 1 < WORLD_WIDTH) {
-      if (control.getWorld(this.x - 1, this.y + 1).isBreakable()) {
+    if (
+      this.x - 1 >= 0 &&
+      this.y + 1 < WORLD_HEIGHT &&
+      this.lastPosition == "left"
+    ) {
+      if (
+        control.getWorld(this.x - 1, this.y).isTraversable() &&
+        control.getWorld(this.x - 1, this.y + 1).isBreakable()
+      ) {
         this.imageName = "hero_shoots_left";
         control.getWorld(this.x - 1, this.y + 1).hide();
         setTimeout(
@@ -396,6 +403,43 @@ class Hero extends ActiveActor {
           this.x - 1,
           this.y + 1
         );
+        if (
+          this.canGoRight() &&
+          (control.getWorld(this.x + 1, this.y + 1).isClimbable() ||
+            !control.getWorld(this.x + 1, this.y + 1).isTraversable())
+        ) {
+          this.move(1, 0);
+        }
+      }
+    }
+    //shoots right
+    else {
+      if (
+        this.x + 1 < WORLD_WIDTH - 1 &&
+        this.y + 1 < WORLD_HEIGHT &&
+        this.lastPosition == "right"
+      ) {
+        if (
+          control.getWorld(this.x + 1, this.y).isTraversable() &&
+          control.getWorld(this.x + 1, this.y + 1).isBreakable()
+        ) {
+          this.imageName = "hero_shoots_right";
+          control.getWorld(this.x + 1, this.y + 1).hide();
+          setTimeout(
+            GameFactory.actorFromCode,
+            5000,
+            "t",
+            this.x + 1,
+            this.y + 1
+          );
+          if (
+            this.canGoLeft() &&
+            (control.getWorld(this.x - 1, this.y + 1).isClimbable() ||
+              !control.getWorld(this.x - 1, this.y + 1).isTraversable())
+          ) {
+            this.move(-1, 0);
+          }
+        }
       }
     }
   }
@@ -503,9 +547,9 @@ class Robot extends ActiveActor {
     if (
       this.x > 0 &&
       this.x < WORLD_WIDTH - 1 &&
-      control.world[this.x][this.y] == empty &&
-      control.world[this.x + 1][this.y].imageName == "brick" &&
-      control.world[this.x - 1][this.y].imageName == "brick" &&
+      control.getWorld(this.x, this.y) == empty &&
+      control.getWorld(this.x + 1, this.y) != empty &&
+      control.getWorld(this.x - 1, this.y) != empty &&
       this.stop == false
     ) {
       if (this.hasGold) {
@@ -633,7 +677,7 @@ class GameControl {
     for (let i = 0; i < WORLD_WIDTH; i++) {
       for (let j = 0; j < WORLD_HEIGHT; j++) {
         if (
-          this.worldActive[i][j].character == "Vilain" &&
+          this.worldActive[i][j].character == "Villain" &&
           this.worldActive[i][j].hasGold
         )
           return false;
