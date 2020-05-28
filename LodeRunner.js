@@ -204,7 +204,10 @@ class ActiveActor extends Actor {
       else this.imageName = "robot_falls_right";
       this.move(0, 1);
     }
-    if (control.getWorld(this.x, this.y + 1).isGrabable()) {
+    if (
+      this.y + 1 < WORLD_HEIGHT &&
+      control.getWorld(this.x, this.y + 1).isGrabable()
+    ) {
       this.move(0, 1);
     }
   }
@@ -566,8 +569,8 @@ class Robot extends ActiveActor {
   animation() {
     if (this.time % 2 == 0) return;
     if (
-      this.x > 0 &&
-      this.x < WORLD_WIDTH - 1 &&
+      this.x >= 0 &&
+      this.x < WORLD_WIDTH &&
       control.getWorld(this.x, this.y).isBroken() &&
       this.stop == false
     ) {
