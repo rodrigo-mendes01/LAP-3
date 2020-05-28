@@ -11,7 +11,7 @@
 TODO:
   
   Features:
-    - Morte do herói
+    - Morte do herói -done-
     - HTML melhorado
       - Pontos
       - Botão reset
@@ -292,7 +292,7 @@ class ActiveActor extends Actor {
   animation(k) {
     switch (k) {
       case " ":
-        this.shoot();
+        this.shoot(this.x, this.y);
         break;
       case null:
         this.fall(this);
@@ -442,7 +442,7 @@ class Hero extends ActiveActor {
         }
       }
     }
-    //shoots right
+    //shoot right
     else {
       if (
         this.x + 1 < WORLD_WIDTH &&
@@ -494,7 +494,6 @@ class Hero extends ActiveActor {
 
   animation() {
     var k = control.getKey();
-    // mudar audio para game control
     if (k != null && audio == null) {
       audio = new Audio(
         "http://ctp.di.fct.unl.pt/miei/lap/projs/proj2020-3/files/louiscole.m4a"
@@ -513,21 +512,6 @@ class Hero extends ActiveActor {
       control.appearFinalLadder();
     }
     control.endGameVerification();
-    if (this.isDead()) {
-      //DO SOMETHING_____-------------------------------------------------------------------------------------------------------
-      //IMPORTANTE--------------------------------------------------------------------------------------------------------------
-    }
-  }
-  isDead() {
-    for (let i = 0; i < WORLD_WIDTH; i++) {
-      for (let j = 0; j < WORLD_HEIGHT; j++) {
-        let a = control.getWorldActive(i, j);
-        if (a.character == "Villain") {
-          if (i == this.x && this.y == j) this.died = true;
-        }
-      }
-    }
-    return this.died;
   }
 }
 
@@ -550,8 +534,8 @@ class Robot extends ActiveActor {
       if (super.canGoDown(this)) {
         if (
           control.getWorld(this.x, this.y + 1) == empty &&
-          !control.world(this.x, this.y).isClimbable() &&
-          !control.world(this.x, this.y).isGrabable()
+          !control.getWorld(this.x, this.y).isClimbable() &&
+          !control.getWorld(this.x, this.y).isGrabable()
         )
           return null;
         else return [0, 1];
@@ -609,13 +593,24 @@ class Robot extends ActiveActor {
       setTimeout(this.rearrangeRobot, 3800, this);
     }
     if (this.stop == false) {
-      var k = this.robotMovement(hero, this);
+      let k = this.robotMovement(hero, this);
       super.animation(k);
       if (control.getWorld(this.x, this.y).isCollectable() && !this.hasGold) {
         control.getWorld(this.x, this.y).hide();
         this.hasGold = true;
         this.show();
       }
+      let leftBlockActive = control.getWorldActive(this.x - 1, this.y);
+      let rightBlockActive = control.getWorldActive(this.x + 1, this.y);
+      let topBlockActive = control.getWorldActive(this.x, this.y - 1);
+      let bottomBlockActive = control.getWorldActive(this.x, this.y + 1);
+      if (
+        leftBlockActive instanceof Hero ||
+        rightBlockActive instanceof Hero ||
+        topBlockActive instanceof Hero ||
+        bottomBlockActive instanceof Hero
+      )
+        hero.isDead = true;
     }
   }
 
@@ -747,7 +742,10 @@ class GameControl {
   }
 
   endGameVerification() {
-    if (
+    if (hero.isDead) {
+      this.resetMap();
+      this.loadLevel(this.level);
+    } else if (
       hero.isGoldCollected() &&
       hero.y == 0 &&
       this.getWorld(hero.x, hero.y).isClimbable()
