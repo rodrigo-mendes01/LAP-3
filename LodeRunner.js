@@ -60,6 +60,7 @@ class PassiveActor extends Actor {
     let walkable = false;
     let breakable = false;
     let collectable = false;
+    let broke = false;
   }
   show() {
     control.world[this.x][this.y] = this;
@@ -86,6 +87,9 @@ class PassiveActor extends Actor {
   }
   isCollectable() {
     return this.collectable;
+  }
+  isBroken() {
+    return this.broke;
   }
 
   //teste
@@ -206,7 +210,10 @@ class ActiveActor extends Actor {
   }
 
   goUp() {
-    if (this.canGoUp(this)) {
+    if (
+      this.canGoUp(this) &&
+      control.getWorld(this.x, this.y).imageName != "empty"
+    ) {
       if (this.y % 2 == 0) {
         if (this.character == "Hero") this.imageName = "hero_on_ladder_right";
         else this.imageName = "robot_on_ladder_right";
@@ -312,6 +319,15 @@ class Brick extends PassiveActor {
     this.breakable = true;
     this.walkable = true;
   }
+  makeInvisible() {
+    this.hide();
+    this.imageName = "empty";
+    this.breakable = false;
+    this.walkable = false;
+    this.traversable = true;
+    this.broke = true;
+    this.show();
+  }
 }
 
 class Chimney extends PassiveActor {
@@ -395,7 +411,7 @@ class Hero extends ActiveActor {
         control.getWorld(this.x - 1, this.y + 1).isBreakable()
       ) {
         this.imageName = "hero_shoots_left";
-        control.getWorld(this.x - 1, this.y + 1).hide();
+        control.getWorld(this.x - 1, this.y + 1).makeInvisible();
         setTimeout(
           GameFactory.actorFromCode,
           5000,
@@ -424,7 +440,7 @@ class Hero extends ActiveActor {
           control.getWorld(this.x + 1, this.y + 1).isBreakable()
         ) {
           this.imageName = "hero_shoots_right";
-          control.getWorld(this.x + 1, this.y + 1).hide();
+          control.getWorld(this.x + 1, this.y + 1).makeInvisible();
           setTimeout(
             GameFactory.actorFromCode,
             5000,
@@ -552,9 +568,7 @@ class Robot extends ActiveActor {
     if (
       this.x > 0 &&
       this.x < WORLD_WIDTH - 1 &&
-      control.getWorld(this.x, this.y) == empty &&
-      control.getWorld(this.x + 1, this.y) != empty &&
-      control.getWorld(this.x - 1, this.y) != empty &&
+      control.getWorld(this.x, this.y).isBroken() &&
       this.stop == false
     ) {
       if (this.hasGold) {
