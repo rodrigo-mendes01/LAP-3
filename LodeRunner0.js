@@ -130,7 +130,7 @@ const MAPS = Object.freeze([
     "tptptptetttttttT..E.........",
     ".......eccccccccccE....o....",
     ".......e....tte...tttttttett",
-    ".......e....tte..........e..",
+    ".......e....tte......et..e..",
     ".....S.e....tte.......or.e..",
     "ttettttt....ttttttttettttttt",
     "..e.................e.......",
