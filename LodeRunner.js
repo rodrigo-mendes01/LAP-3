@@ -208,6 +208,7 @@ class ActiveActor extends Actor {
     if (
       this.character == "Villain" &&
       this.y + 1 < WORLD_HEIGHT &&
+      !control.alreadyOcupied(this.x, this.y + 1) &&
       !control.getWorld(this.x, this.y).isBroken() &&
       control.getWorld(this.x, this.y + 1).isGrabable()
     ) {
@@ -216,6 +217,7 @@ class ActiveActor extends Actor {
     if (
       this.character == "Hero" &&
       this.y + 1 < WORLD_HEIGHT &&
+      !control.alreadyOcupied(this.x, this.y + 1) &&
       control.getWorld(this.x, this.y + 1).isGrabable()
     ) {
       this.move(0, 1);
@@ -719,7 +721,11 @@ class GameControl {
   keyUpEvent(k) {}
 
   alreadyOcupied(x, y) {
-    if (this.getWorldActive(x, y).character == "Villain") return true;
+    if (
+      this.getWorldActive(x, y).character == "Villain" ||
+      this.getWorldActive(x, y).character == "Hero"
+    )
+      return true;
     return false;
   }
 
