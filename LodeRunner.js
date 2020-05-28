@@ -11,9 +11,6 @@
 TODO:
   Bugs:
     - Ladrão cai no buraco com corda por baixo e não fica preso
-  Refactors:
-    - Mudar transição de nível de Hero para GameControl
-    - Reformulação de shoot
   Features:
     - HTML melhorado
       - Pontos
