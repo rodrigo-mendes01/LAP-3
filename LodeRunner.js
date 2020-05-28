@@ -491,10 +491,6 @@ class Robot extends ActiveActor {
     this.character = "Villain";
   }
 
-  isWalkable() {
-    return walkable;
-  }
-
   robotMovement() {
     if (hero.y > this.y) {
       if (super.canGoDown(this)) {
@@ -668,9 +664,11 @@ class GameControl {
       return this.worldActive[x][y];
     else return null;
   }
+
   keyDownEvent(k) {
     control.key = k.keyCode;
   }
+
   keyUpEvent(k) {}
 
   isGoldCollected() {
