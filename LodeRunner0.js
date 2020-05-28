@@ -126,7 +126,7 @@ const WORLD_HEIGHT = 16;
 const MAPS = Object.freeze([
   [
     "..................E.........",
-    "....o.....t.h.....E.........",
+    "....o.....o.h.....E.........",
     "tptptptetttttttT..E.........",
     ".......eccccccccccE....o....",
     ".......e....tte...tttttttett",
