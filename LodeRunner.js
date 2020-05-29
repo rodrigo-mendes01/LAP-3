@@ -10,10 +10,8 @@
 -------------------------------------------||-------------------------------------------
 TODO:
   
-  Features:
-    - Bug regeneração após reset. (dentro de else? maybe?)
-    - Robot deixar cair ouro ao calhas
-    - Modificar contagem de gold para fazer a contagem inicial
+  Bugs: Robots n regeneram? wtf
+        Bricks fazem mesma coisa que robts faziam (regeneram fora do nível)
 -------------------------------------------||----------------------------------------------
 */
 
@@ -337,7 +335,7 @@ class Brick extends PassiveActor {
     this.breakable = false;
     this.walkable = false;
     this.traversable = true;
-    this.broke = true;
+    this.broken = true;
     this.show();
   }
 }
