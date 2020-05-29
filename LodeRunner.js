@@ -416,6 +416,9 @@ class Hero extends ActiveActor {
   }
 
   shoot() {
+    let a = new Audio(
+      "http://www.flashkit.com/imagesvr_ce/flashkit/soundfx/Electronic/Arcade/PulseSho-Mark_E_B-8071/PulseSho-Mark_E_B-8071_hifi.mp3"
+    );
     //shoot left
     if (
       this.x - 1 >= 0 &&
@@ -428,6 +431,7 @@ class Hero extends ActiveActor {
       ) {
         this.imageName = "hero_shoots_left";
         control.getWorld(this.x - 1, this.y + 1).makeInvisible();
+        a.play();
         setTimeout(
           GameFactory.actorFromCode,
           5000,
@@ -457,6 +461,7 @@ class Hero extends ActiveActor {
         ) {
           this.imageName = "hero_shoots_right";
           control.getWorld(this.x + 1, this.y + 1).makeInvisible();
+          a.play();
           setTimeout(
             GameFactory.actorFromCode,
             5000,
@@ -508,10 +513,18 @@ class Hero extends ActiveActor {
     if (control.getWorld(this.x, this.y).isCollectable()) {
       control.getWorld(this.x, this.y).hide();
       this.show();
+      let a = new Audio(
+        "http://www.flashkit.com/imagesvr_ce/flashkit/soundfx/Electronic/Arcade/RewardSo-Mark_E_B-8078/RewardSo-Mark_E_B-8078_hifi.mp3"
+      );
+      a.play();
     }
     if (this.isGoldCollected() && this.verification == 0) {
+      let b = new Audio(
+        "http://www.flashkit.com/imagesvr_ce/flashkit/soundfx/Electronic/Arcade/RewardSo-Mark_E_B-8078/RewardSo-Mark_E_B-8078_hifi.mp3"
+      );
       this.verification = 1;
       control.appearFinalLadder();
+      b.play();
     }
     control.endGameVerification();
   }
@@ -612,11 +625,13 @@ class Robot extends ActiveActor {
       let rightBlockActive = control.getWorldActive(this.x + 1, this.y);
       let topBlockActive = control.getWorldActive(this.x, this.y - 1);
       let bottomBlockActive = control.getWorldActive(this.x, this.y + 1);
+      let curBlock = control.getWorldActive(this.x, this.y);
       if (
         (leftBlockActive != null && leftBlockActive.character == "Hero") ||
         (rightBlockActive != null && rightBlockActive.character == "Hero") ||
         (topBlockActive != null && topBlockActive.character == "Hero") ||
-        (bottomBlockActive != null && bottomBlockActive.character == "Hero")
+        (bottomBlockActive != null && bottomBlockActive.character == "Hero") ||
+        curBlock.character == "Hero"
       ) {
         hero.isDead = true;
         this.reinitialized = true;
