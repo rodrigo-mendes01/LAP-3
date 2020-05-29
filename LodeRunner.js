@@ -543,6 +543,8 @@ class Robot extends ActiveActor {
     this.stop = false;
     this.character = "Villain";
     let reinitialized = false;
+    let dropGold = -1;
+    let robotRespawn = -1;
   }
 
   robotMovement() {
@@ -594,6 +596,19 @@ class Robot extends ActiveActor {
 
   animation() {
     if (this.time % 2 == 0) return;
+    if (this.dropGold == this.time && this.hasGold) {
+      let curBlock = control.getWorld(this.x, this.y);
+      if (
+        control.getWorld(this.x, this.y + 1).isWalkable() &&
+        curBlock == empty
+      ) {
+        GameFactory.actorFromCode("o", this.x, this.y);
+        this.hasGold = false;
+      } else this.dropGold += 8;
+    }
+    if (this.robotRespawn == this.time) {
+      this.rearrangeRobot(this);
+    }
     if (
       this.x >= 0 &&
       this.x < WORLD_WIDTH &&
@@ -604,12 +619,9 @@ class Robot extends ActiveActor {
         GameFactory.actorFromCode("o", this.x, this.y - 1);
         this.hasGold = false;
       }
-      if (this.reinitialized) clearTimeout(tS);
-      else {
-        this.stop = true;
-        control.world[this.x][this.y] = empty;
-        var tS = setTimeout(this.rearrangeRobot, 4000, this);
-      }
+      this.stop = true;
+      control.world[this.x][this.y] = empty;
+      this.robotRespawn = this.time + 32;
     }
     if (this.stop == false) {
       let k = this.robotMovement(hero, this);
@@ -617,6 +629,7 @@ class Robot extends ActiveActor {
       if (control.getWorld(this.x, this.y).isCollectable() && !this.hasGold) {
         control.getWorld(this.x, this.y).hide();
         this.hasGold = true;
+        this.dropGold = this.time + 20;
         this.show();
       }
       let leftBlockActive = control.getWorldActive(this.x - 1, this.y);
@@ -638,13 +651,8 @@ class Robot extends ActiveActor {
   }
   rearrangeRobot(robot) {
     robot.stop = false;
-    if (
-      control.getWorld(robot.x + 1, robot.y - 1) != null &&
-      control.getWorld(robot.x + 1, robot.y - 1).isTraversable()
-    )
-      robot.move(1, -1);
-    else robot.move(-1, -1);
-    GameFactory.actorFromCode("t", robot.x - 1, robot.y + 1);
+    GameFactory.actorFromCode("t", robot.x, robot.y);
+    robot.move(0, -1);
   }
 }
 
@@ -661,7 +669,7 @@ class GameControl {
     this.worldActive = this.createMatrix();
     let level;
     this.level = 1;
-    this.loadLevel(2);
+    this.loadLevel(this.level);
     this.setupEvents();
   }
   createMatrix() {
