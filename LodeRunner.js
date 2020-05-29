@@ -698,7 +698,7 @@ class Robot extends ActiveActor {
     }
   }
 
-  //Check if Hero is adjacent to Robot
+  // Verifica se Hero está adjacente ao Robot
   checkSurroudings() {
     let leftBlockActive = control.getWorldActive(this.x - 1, this.y);
     let rightBlockActive = control.getWorldActive(this.x + 1, this.y);
