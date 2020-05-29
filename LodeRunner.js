@@ -6,16 +6,6 @@
 // GLOBAL VARIABLES
 
 // tente não definir mais nenhuma variável global
-/*
--------------------------------------------||-------------------------------------------
-TODO:
-  
-  Features:
-    - Bug regeneração após reset. (dentro de else? maybe?)
-    - Robot deixar cair ouro ao calhas
-    - Modificar contagem de gold para fazer a contagem inicial
--------------------------------------------||----------------------------------------------
-*/
 
 // Autores: Rodrigo Mendes (55308), Tomás Silva (55749)
 
@@ -414,6 +404,9 @@ class Hero extends ActiveActor {
     this.initialGold = 0;
     let goldCollected;
     this.goldCollected = 0;
+    let brickTime = -1;
+    let brickX = -1;
+    let brickY = -1;
   }
 
   shoot() {
@@ -433,13 +426,9 @@ class Hero extends ActiveActor {
         this.imageName = "hero_shoots_left";
         control.getWorld(this.x - 1, this.y + 1).makeInvisible();
         shootAudio.play();
-        setTimeout(
-          GameFactory.actorFromCode,
-          5000,
-          "t",
-          this.x - 1,
-          this.y + 1
-        );
+        this.brickTime = this.time + 32;
+        this.brickX = this.x - 1;
+        this.brickY = this.y + 1;
         if (
           this.canGoRight() &&
           (control.getWorld(this.x + 1, this.y + 1).isClimbable() ||
@@ -463,13 +452,9 @@ class Hero extends ActiveActor {
           this.imageName = "hero_shoots_right";
           control.getWorld(this.x + 1, this.y + 1).makeInvisible();
           shootAudio.play();
-          setTimeout(
-            GameFactory.actorFromCode,
-            5000,
-            "t",
-            this.x + 1,
-            this.y + 1
-          );
+          this.brickTime = this.time + 32;
+          this.brickX = this.x + 1;
+          this.brickY = this.y + 1;
           if (
             this.canGoLeft() &&
             (control.getWorld(this.x - 1, this.y + 1).isClimbable() ||
@@ -497,6 +482,9 @@ class Hero extends ActiveActor {
   }
 
   animation() {
+    if (this.time == this.brickTime) {
+      GameFactory.actorFromCode("t", this.brickX, this.brickY);
+    }
     var k = control.getKey();
     if (k != null && audio == null) {
       audio = new Audio(
