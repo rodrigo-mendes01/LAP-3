@@ -807,6 +807,6 @@ function toggleMusic() {
 }
 
 function selectLevel() {
-  let lvl = document.getElementsByName("levelSelector").value;
+  let lvl = document.getElementsById("levelSelector").value;
   return lvl;
 }
