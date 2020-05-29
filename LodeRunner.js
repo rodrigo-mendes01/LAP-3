@@ -335,7 +335,7 @@ class Brick extends PassiveActor {
     this.breakable = false;
     this.walkable = false;
     this.traversable = true;
-    this.broken = true;
+    this.broke = true;
     this.show();
   }
 }
