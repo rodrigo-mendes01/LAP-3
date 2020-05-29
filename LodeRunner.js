@@ -805,6 +805,11 @@ function toggleMusic() {
 }
 
 function selectLevel() {
-  let lvl = document.getElementsById("levelSelector").value;
-  return lvl;
+  let selection = document.getElementsByName("levelSelector");
+  let lvl = null;
+  for (let i = 0; i <= 15; i++)
+    if (selection[i].checked) lvl = selection[i].value;
+  control.resetMap();
+  control.loadLevel(lvl);
+  control.level = lvl;
 }
