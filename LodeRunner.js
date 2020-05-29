@@ -86,13 +86,13 @@ class Actor {
 class PassiveActor extends Actor {
   constructor(x, y, imageName) {
     super(x, y, imageName);
-    let traversable = false;
-    let climbable = false;
-    let grabable = false;
-    let walkable = false;
-    let breakable = false;
-    let collectable = false;
-    let broke = false;
+    let traversable = false; //bloco atravessável
+    let climbable = false; //bloco subível (eg. escadas)
+    let grabable = false; //bloco agarrável (eg. cordas)
+    let walkable = false; //bloco andável
+    let breakable = false; //bloco destruível
+    let collectable = false; //bloco apanhável
+    let broken = false; //bloco destruído
   }
   show() {
     control.world[this.x][this.y] = this;
@@ -121,10 +121,8 @@ class PassiveActor extends Actor {
     return this.collectable;
   }
   isBroken() {
-    return this.broke;
+    return this.broken;
   }
-
-  //teste
 }
 
 class ActiveActor extends Actor {
@@ -142,6 +140,7 @@ class ActiveActor extends Actor {
     control.world[this.x][this.y].draw(this.x, this.y);
   }
 
+  // Verifica se é possível a subida
   canGoUp() {
     let curBlock = control.getWorld(this.x, this.y);
     let blockAbove = control.getWorld(this.x, this.y - 1);
@@ -160,6 +159,7 @@ class ActiveActor extends Actor {
     return false;
   }
 
+  // Verifica se é possível a descida
   canGoDown() {
     let blockBelow = control.getWorld(this.x, this.y + 1);
     if (blockBelow != null && !control.alreadyOcupied(this.x, this.y + 1))
@@ -170,6 +170,7 @@ class ActiveActor extends Actor {
     return false;
   }
 
+  // Verifica se é possível ir para a esquerda
   canGoLeft() {
     let curBlock = control.getWorld(this.x, this.y);
     let leftBlock = control.getWorld(this.x - 1, this.y);
@@ -195,6 +196,7 @@ class ActiveActor extends Actor {
     return false;
   }
 
+  // Verifica se é possível ir para a direita
   canGoRight() {
     let curBlock = control.getWorld(this.x, this.y);
     let rightBlock = control.getWorld(this.x + 1, this.y);
@@ -220,6 +222,7 @@ class ActiveActor extends Actor {
     return false;
   }
 
+  // Função que simula a gravidade
   fall() {
     let curBlock = control.getWorld(this.x, this.y);
     let belowBlock = control.getWorld(this.x, this.y + 1);
@@ -244,6 +247,7 @@ class ActiveActor extends Actor {
       this.character == "Villain" &&
       this.y + 1 < WORLD_HEIGHT &&
       !control.alreadyOcupied(this.x, this.y + 1) &&
+      //Vilão(Robot) não se pode movimentar num bloco partido pelo Hero
       !control.getWorld(this.x, this.y).isBroken() &&
       control.getWorld(this.x, this.y + 1).isGrabable()
     ) {
@@ -259,6 +263,7 @@ class ActiveActor extends Actor {
     }
   }
 
+  // Movimenta o ator para cima
   goUp() {
     if (
       this.canGoUp(this) &&
@@ -275,6 +280,7 @@ class ActiveActor extends Actor {
     }
   }
 
+  // Movimenta o ator para baixo
   goDown() {
     if (this.canGoDown(this)) {
       if (this.y % 2 == 0) {
@@ -288,6 +294,7 @@ class ActiveActor extends Actor {
     }
   }
 
+  // Movimenta o ator para a direita
   goRight() {
     if (this.canGoRight(this)) {
       if (control.getWorld(this.x + 1, this.y).isGrabable()) {
@@ -307,6 +314,7 @@ class ActiveActor extends Actor {
     }
   }
 
+  // Movimenta o ator para a esquerda
   goLeft() {
     if (this.canGoLeft(this)) {
       if (control.getWorld(this.x - 1, this.y).isGrabable()) {
@@ -339,21 +347,21 @@ class ActiveActor extends Actor {
         switch (dx) {
           case 0:
             switch (dy) {
-              // player goes up
+              // actor goes up
               case -1:
                 this.goUp(this);
                 break;
-              // player goes down
+              // actor goes down
               case 1:
                 this.goDown(this);
                 break;
             }
             break;
-          //player goes right
+          //actor goes right
           case 1:
             this.goRight(this);
             break;
-          //player goes left
+          //actor goes left
           case -1:
             this.goLeft(this);
             break;
@@ -363,6 +371,7 @@ class ActiveActor extends Actor {
   }
 }
 
+// Pode ser destruído e andável
 class Brick extends PassiveActor {
   constructor(x, y) {
     super(x, y, "brick");
@@ -370,16 +379,18 @@ class Brick extends PassiveActor {
     this.walkable = true;
   }
   makeInvisible() {
+    // Partir o bloco
     this.hide();
     this.imageName = "empty";
     this.breakable = false;
     this.walkable = false;
     this.traversable = true;
-    this.broke = true;
+    this.broken = true;
     this.show();
   }
 }
 
+// Pode ser atravessado
 class Chimney extends PassiveActor {
   constructor(x, y) {
     super(x, y, "chimney");
@@ -387,6 +398,7 @@ class Chimney extends PassiveActor {
   }
 }
 
+// Pode ser atravessado
 class Empty extends PassiveActor {
   constructor() {
     super(-1, -1, "empty");
@@ -396,6 +408,7 @@ class Empty extends PassiveActor {
   hide() {}
 }
 
+// Pode ser atravessado e apanhado
 class Gold extends PassiveActor {
   constructor(x, y) {
     super(x, y, "gold");
@@ -410,12 +423,14 @@ class Invalid extends PassiveActor {
   }
 }
 
+// Pode ser atravessado e subido
 class Ladder extends PassiveActor {
   constructor(x, y) {
     super(x, y, "empty");
     this.traversable = true;
   }
   makeVisible() {
+    // Caso das escadas finais começam escondidas
     this.imageName = "ladder";
     this.show();
     this.climbable = true;
@@ -423,6 +438,7 @@ class Ladder extends PassiveActor {
   }
 }
 
+// Pode ser agarrável
 class Rope extends PassiveActor {
   constructor(x, y) {
     super(x, y, "rope");
@@ -430,6 +446,7 @@ class Rope extends PassiveActor {
   }
 }
 
+//Pode ser andável
 class Stone extends PassiveActor {
   constructor(x, y) {
     super(x, y, "stone");
@@ -515,6 +532,7 @@ class Hero extends ActiveActor {
     }
   }
 
+  // Conta quantos blocos apanháveis existem no mapa
   countInitialGold() {
     let amount = 0;
     for (let i = 0; i < WORLD_WIDTH; i++) {
@@ -589,6 +607,7 @@ class Robot extends ActiveActor {
     let robotRespawn = -1;
   }
 
+  // Pathfinding do Robot
   robotMovement() {
     if (hero.y > this.y) {
       if (super.canGoDown(this)) {
@@ -638,6 +657,7 @@ class Robot extends ActiveActor {
 
   animation() {
     if (this.time % 2 == 0) return;
+    // Largar ouro após algum tempo
     if (this.dropGold == this.time && this.hasGold) {
       let curBlock = control.getWorld(this.x, this.y);
       if (
@@ -646,11 +666,12 @@ class Robot extends ActiveActor {
       ) {
         GameFactory.actorFromCode("o", this.x, this.y);
         this.hasGold = false;
-      } else this.dropGold += 8;
+      } else this.dropGold += 8; // não conseguiu largar, + 2s
     }
     if (this.robotRespawn == this.time) {
       this.rearrangeRobot(this);
     }
+    // Queda num buraco do Hero
     if (
       this.x >= 0 &&
       this.x < WORLD_WIDTH &&
@@ -666,37 +687,41 @@ class Robot extends ActiveActor {
       this.robotRespawn = this.time + 32;
     }
     if (this.stop == false) {
-      let k = this.robotMovement(hero, this);
-      super.animation(k);
+      super.animation(this.robotMovement(hero, this));
       if (control.getWorld(this.x, this.y).isCollectable() && !this.hasGold) {
         control.getWorld(this.x, this.y).hide();
         this.hasGold = true;
         this.dropGold = this.time + 20;
         this.show();
       }
-      let leftBlockActive = control.getWorldActive(this.x - 1, this.y);
-      let rightBlockActive = control.getWorldActive(this.x + 1, this.y);
-      let topBlockActive = control.getWorldActive(this.x, this.y - 1);
-      let bottomBlockActive = control.getWorldActive(this.x, this.y + 1);
-      let bottomBlock = control.getWorld(this.x, this.y + 1);
-      let topBlock = control.getWorld(this.x, this.y - 1);
-      let curBlock = control.getWorldActive(this.x, this.y);
-      if (
-        ((leftBlockActive != null && leftBlockActive.character == "Hero") ||
-          (rightBlockActive != null && rightBlockActive.character == "Hero") ||
-          (topBlockActive != null &&
-            topBlockActive.character == "Hero" &&
-            !topBlock.isGrabable()) ||
-          (bottomBlockActive != null &&
-            bottomBlockActive.character == "Hero") ||
-          curBlock.character == "Hero") &&
-        !bottomBlock.isBroken()
-      ) {
-        hero.isDead = true;
-        this.reinitialized = true;
-      }
+      this.checkSurroudings();
     }
   }
+
+  //Check if Hero is adjacent to Robot
+  checkSurroudings() {
+    let leftBlockActive = control.getWorldActive(this.x - 1, this.y);
+    let rightBlockActive = control.getWorldActive(this.x + 1, this.y);
+    let topBlockActive = control.getWorldActive(this.x, this.y - 1);
+    let bottomBlockActive = control.getWorldActive(this.x, this.y + 1);
+    let bottomBlock = control.getWorld(this.x, this.y + 1);
+    let topBlock = control.getWorld(this.x, this.y - 1);
+    let curBlock = control.getWorldActive(this.x, this.y);
+    if (
+      ((leftBlockActive != null && leftBlockActive.character == "Hero") ||
+        (rightBlockActive != null && rightBlockActive.character == "Hero") ||
+        (topBlockActive != null &&
+          topBlockActive.character == "Hero" &&
+          !topBlock.isGrabable()) ||
+        (bottomBlockActive != null && bottomBlockActive.character == "Hero") ||
+        curBlock.character == "Hero") &&
+      !bottomBlock.isBroken()
+    ) {
+      hero.isDead = true;
+      this.reinitialized = true;
+    }
+  }
+
   rearrangeRobot(robot) {
     robot.stop = false;
     GameFactory.actorFromCode("t", robot.x, robot.y);
