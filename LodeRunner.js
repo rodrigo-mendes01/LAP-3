@@ -8,6 +8,54 @@
 // tente não definir mais nenhuma variável global
 
 // Autores: Rodrigo Mendes (55308), Tomás Silva (55749)
+/* 
+Funcionalidades implementadas:
+      HTML:
+        - Página web melhorada com fundo diferente, elementos centrados na
+        página, título do jogo e informações relevantes.
+        - Botão pause/play da música do jogo
+        - Selecionador de níveis/reset do nível
+              - Selecionamos o nível no elemento radio e clicamos no botão
+              "Select Level" para carregar esse nível. Também serve como reset
+              do nível uma vez que podemos selecionar o nível atual.
+        - Contador de quantos "golds" apanhou o jogador com o número atual
+          e quantos existem no nível, imagem para simbolizar o seu
+          significado e font dos valores apropriada.
+
+      JavaScript (todas as funcionalidades foram implementadas):
+        Hero:
+          - Hero pode subir/descer escadas.
+          - Hero pode usar as cordas.
+          - Hero pode usar as chaminés.
+          - Hero cai com animação alternada.
+          - Hero pode partir tijolos (segundo as regras estipuladas no 
+            enunciado) acompanhado com um som de disparo.
+                - Hero parte o tijolo para o lado que está virado.
+                    - No caso que tenha acabado de sair de uma escada ou corda,
+                    dispara para o útimo lado para que estava virado.
+                - Tijolos regeneram após 4s.
+                - Hero muda de imagem consoante o lado do seu tiro.
+                - Hero é projetado um bloco para trás quando dispara (quando
+                  a sua posição o permite).
+          - Hero pode apanhar os ouros acompanhado por um som.
+          - Quando todos os ouros são apanhados as escadas finais aparecem.
+        
+        Robots:
+          - Velocidade dos robots metade da do Hero.
+          - Robots movimentam-se tentando reduzir a sua distãncia em relação
+          ao Hero.
+          - Robots podem usar escadas, cordas e chaminés.
+          - Robots podem apanhar 1 ouro de cada vez.
+                - Robots carregam o ouro durante 3 segundos, depois tentam
+                largá-lo, se não conseguirem, esperam mais 2 segundos.
+          - Robots caem nos buracos criados pelo Hero.
+                - Caem num buraco criado pelo Hero, não atravessam.
+                - Largam o ouro na casa acima deles.
+                - Regeneram 4s depois.
+                - Se tocarem no Hero, o mapa reinicia e recebemos uma mensagem
+                do site.
+
+*/
 
 let empty, hero, control, audio;
 
