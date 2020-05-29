@@ -635,13 +635,16 @@ class Robot extends ActiveActor {
       let rightBlockActive = control.getWorldActive(this.x + 1, this.y);
       let topBlockActive = control.getWorldActive(this.x, this.y - 1);
       let bottomBlockActive = control.getWorldActive(this.x, this.y + 1);
+      let bottomBlock = control.getWorld(this.x, this.y + 1);
       let curBlock = control.getWorldActive(this.x, this.y);
       if (
-        (leftBlockActive != null && leftBlockActive.character == "Hero") ||
-        (rightBlockActive != null && rightBlockActive.character == "Hero") ||
-        (topBlockActive != null && topBlockActive.character == "Hero") ||
-        (bottomBlockActive != null && bottomBlockActive.character == "Hero") ||
-        curBlock.character == "Hero"
+        ((leftBlockActive != null && leftBlockActive.character == "Hero") ||
+          (rightBlockActive != null && rightBlockActive.character == "Hero") ||
+          (topBlockActive != null && topBlockActive.character == "Hero") ||
+          (bottomBlockActive != null &&
+            bottomBlockActive.character == "Hero") ||
+          curBlock.character == "Hero") &&
+        !bottomBlock.isBroken()
       ) {
         hero.isDead = true;
         this.reinitialized = true;
