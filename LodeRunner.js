@@ -791,6 +791,7 @@ function toggleMusic() {
     else audio.play();
 }
 
-function b2() {
-  mesg("button2");
+function selectLevel() {
+  let lvl = document.getElementsByName("levelSelector").value;
+  return lvl;
 }
