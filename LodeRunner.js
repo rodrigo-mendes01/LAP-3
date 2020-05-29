@@ -374,12 +374,12 @@ class Ladder extends PassiveActor {
   constructor(x, y) {
     super(x, y, "empty");
     this.traversable = true;
-    this.climbable = true;
-    this.walkable = true;
   }
   makeVisible() {
     this.imageName = "ladder";
     this.show();
+    this.climbable = true;
+    this.walkable = true;
   }
 }
 
@@ -523,6 +523,13 @@ class Hero extends ActiveActor {
       control.appearFinalLadder();
       allGoldCollectedAudio.play();
     }
+    if (
+      !this.canGoUp() &&
+      !this.canGoDown() &&
+      !this.canGoLeft() &&
+      !this.canGoRight()
+    )
+      this.isDead = true;
     control.endGameVerification();
   }
 }
@@ -634,11 +641,14 @@ class Robot extends ActiveActor {
       let topBlockActive = control.getWorldActive(this.x, this.y - 1);
       let bottomBlockActive = control.getWorldActive(this.x, this.y + 1);
       let bottomBlock = control.getWorld(this.x, this.y + 1);
+      let topBlock = control.getWorld(this.x, this.y - 1);
       let curBlock = control.getWorldActive(this.x, this.y);
       if (
         ((leftBlockActive != null && leftBlockActive.character == "Hero") ||
           (rightBlockActive != null && rightBlockActive.character == "Hero") ||
-          (topBlockActive != null && topBlockActive.character == "Hero") ||
+          (topBlockActive != null &&
+            topBlockActive.character == "Hero" &&
+            !topBlock.isGrabable()) ||
           (bottomBlockActive != null &&
             bottomBlockActive.character == "Hero") ||
           curBlock.character == "Hero") &&
@@ -767,7 +777,7 @@ class GameControl {
   appearFinalLadder() {
     for (let i = 0; i < WORLD_WIDTH; i++) {
       for (let j = 0; j < WORLD_HEIGHT; j++) {
-        if (this.getWorld(i, j).isClimbable())
+        if (this.getWorld(i, j) instanceof Ladder)
           this.getWorld(i, j).makeVisible();
       }
     }
