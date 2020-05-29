@@ -529,6 +529,7 @@ class Robot extends ActiveActor {
     let stop;
     this.stop = false;
     this.character = "Villain";
+    let reinitialized = false;
   }
 
   robotMovement() {
@@ -590,9 +591,14 @@ class Robot extends ActiveActor {
         GameFactory.actorFromCode("o", this.x, this.y - 1);
         this.hasGold = false;
       }
-      this.stop = true;
-      control.world[this.x][this.y] = empty;
-      setTimeout(this.rearrangeRobot, 3800, this);
+      if (!this.reinitialized) {
+        this.stop = true;
+        control.world[this.x][this.y] = empty;
+        var tS = setTimeout(this.rearrangeRobot, 4000, this);
+      } else {
+        clearTimeout(tS);
+        this.reinitialized = false;
+      }
     }
     if (this.stop == false) {
       let k = this.robotMovement(hero, this);
@@ -607,18 +613,24 @@ class Robot extends ActiveActor {
       let topBlockActive = control.getWorldActive(this.x, this.y - 1);
       let bottomBlockActive = control.getWorldActive(this.x, this.y + 1);
       if (
-        leftBlockActive instanceof Hero ||
-        rightBlockActive instanceof Hero ||
-        topBlockActive instanceof Hero ||
-        bottomBlockActive instanceof Hero
-      )
+        (leftBlockActive != null && leftBlockActive.character == "Hero") ||
+        (rightBlockActive != null && rightBlockActive.character == "Hero") ||
+        (topBlockActive != null && topBlockActive.character == "Hero") ||
+        (bottomBlockActive != null && bottomBlockActive.character == "Hero")
+      ) {
         hero.isDead = true;
+        this.reinitialized = true;
+      }
     }
   }
-
   rearrangeRobot(robot) {
     robot.stop = false;
-    robot.move(1, -1);
+    if (
+      control.getWorld(robot.x + 1, robot.y - 1) != null &&
+      control.getWorld(robot.x + 1, robot.y - 1).isTraversable()
+    )
+      robot.move(1, -1);
+    else robot.move(-1, -1);
     GameFactory.actorFromCode("t", robot.x - 1, robot.y + 1);
   }
 }
