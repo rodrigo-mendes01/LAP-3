@@ -604,13 +604,11 @@ class Robot extends ActiveActor {
         GameFactory.actorFromCode("o", this.x, this.y - 1);
         this.hasGold = false;
       }
-      if (!this.reinitialized) {
+      if (this.reinitialized) clearTimeout(tS);
+      else {
         this.stop = true;
         control.world[this.x][this.y] = empty;
         var tS = setTimeout(this.rearrangeRobot, 4000, this);
-      } else {
-        clearTimeout(tS);
-        this.reinitialized = false;
       }
     }
     if (this.stop == false) {
@@ -663,7 +661,7 @@ class GameControl {
     this.worldActive = this.createMatrix();
     let level;
     this.level = 1;
-    this.loadLevel(this.level);
+    this.loadLevel(2);
     this.setupEvents();
   }
   createMatrix() {
