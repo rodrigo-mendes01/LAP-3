@@ -11,12 +11,9 @@
 TODO:
   
   Features:
-    - Morte do herói -done-
-    - HTML melhorado
-      - Pontos
-      - Botão reset
-      - Select level
-    - Sons variados
+    - Bug regeneração após reset. (dentro de else? maybe?)
+    - Robot deixar cair ouro ao calhas
+    - Modificar contagem de gold para fazer a contagem inicial
 -------------------------------------------||----------------------------------------------
 */
 
@@ -413,10 +410,14 @@ class Hero extends ActiveActor {
     this.character = "Hero";
     let lastPosition = "left";
     let died = false;
+    let initialGold;
+    this.initialGold = 0;
+    let goldCollected;
+    this.goldCollected = 0;
   }
 
   shoot() {
-    let a = new Audio(
+    let shootAudio = new Audio(
       "http://www.flashkit.com/imagesvr_ce/flashkit/soundfx/Electronic/Arcade/PulseSho-Mark_E_B-8071/PulseSho-Mark_E_B-8071_hifi.mp3"
     );
     //shoot left
@@ -431,7 +432,7 @@ class Hero extends ActiveActor {
       ) {
         this.imageName = "hero_shoots_left";
         control.getWorld(this.x - 1, this.y + 1).makeInvisible();
-        a.play();
+        shootAudio.play();
         setTimeout(
           GameFactory.actorFromCode,
           5000,
@@ -461,7 +462,7 @@ class Hero extends ActiveActor {
         ) {
           this.imageName = "hero_shoots_right";
           control.getWorld(this.x + 1, this.y + 1).makeInvisible();
-          a.play();
+          shootAudio.play();
           setTimeout(
             GameFactory.actorFromCode,
             5000,
@@ -481,22 +482,18 @@ class Hero extends ActiveActor {
     }
   }
 
+  countInitialGold() {
+    let amount = 0;
+    for (let i = 0; i < WORLD_WIDTH; i++) {
+      for (let j = 0; j < WORLD_HEIGHT; j++) {
+        if (control.getWorld(i, j).isCollectable()) amount++;
+      }
+    }
+    return amount;
+  }
+
   isGoldCollected() {
-    for (let i = 0; i < WORLD_WIDTH; i++) {
-      for (let j = 0; j < WORLD_HEIGHT; j++) {
-        if (
-          control.getWorldActive(i, j).character == "Villain" &&
-          control.getWorldActive(i, j).hasGold
-        )
-          return false;
-      }
-    }
-    for (let i = 0; i < WORLD_WIDTH; i++) {
-      for (let j = 0; j < WORLD_HEIGHT; j++) {
-        if (control.getWorld(i, j).isCollectable()) return false;
-      }
-    }
-    return true;
+    return this.initialGold == this.goldCollected;
   }
 
   animation() {
@@ -513,18 +510,20 @@ class Hero extends ActiveActor {
     if (control.getWorld(this.x, this.y).isCollectable()) {
       control.getWorld(this.x, this.y).hide();
       this.show();
-      let a = new Audio(
+      let goldCollectAudio = new Audio(
         "http://www.flashkit.com/imagesvr_ce/flashkit/soundfx/Electronic/Arcade/RewardSo-Mark_E_B-8078/RewardSo-Mark_E_B-8078_hifi.mp3"
       );
-      a.play();
+      goldCollectAudio.play();
+      this.goldCollected++;
+      updateGoldInfo(this.goldCollected);
     }
     if (this.isGoldCollected() && this.verification == 0) {
-      let b = new Audio(
+      let allGoldCollectedAudio = new Audio(
         "http://www.flashkit.com/imagesvr_ce/flashkit/soundfx/Electronic/Arcade/RewardSo-Mark_E_B-8078/RewardSo-Mark_E_B-8078_hifi.mp3"
       );
       this.verification = 1;
       control.appearFinalLadder();
-      b.play();
+      allGoldCollectedAudio.play();
     }
     control.endGameVerification();
   }
@@ -690,6 +689,8 @@ class GameControl {
         // x/y reversed because map stored by lines
         GameFactory.actorFromCode(map[y][x], x, y);
       }
+    hero.initialGold = hero.countInitialGold();
+    updateGoldInfo(0);
   }
   getKey() {
     let k = control.key;
@@ -820,4 +821,9 @@ function selectLevel() {
   control.resetMap();
   control.loadLevel(lvl);
   control.level = lvl;
+}
+
+function updateGoldInfo(amount) {
+  let score = document.getElementById("goldAmount");
+  score.innerHTML = amount + "/" + hero.initialGold;
 }
