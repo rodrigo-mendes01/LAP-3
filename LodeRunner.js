@@ -6,56 +6,18 @@
 // GLOBAL VARIABLES
 
 // tente não definir mais nenhuma variável global
+/*
+-------------------------------------------||-------------------------------------------
+TODO:
+  
+  Features:
+    - Bug regeneração após reset. (dentro de else? maybe?)
+    - Robot deixar cair ouro ao calhas
+    - Modificar contagem de gold para fazer a contagem inicial
+-------------------------------------------||----------------------------------------------
+*/
 
 // Autores: Rodrigo Mendes (55308), Tomás Silva (55749)
-/* 
-Funcionalidades implementadas:
-      HTML:
-        - Página web melhorada com fundo diferente, elementos centrados na
-        página, título do jogo e informações relevantes.
-        - Botão pause/play da música do jogo
-        - Selecionador de níveis/reset do nível
-              - Selecionamos o nível no elemento radio e clicamos no botão
-              "Select Level" para carregar esse nível. Também serve como reset
-              do nível uma vez que podemos selecionar o nível atual.
-        - Contador de quantos "golds" apanhou o jogador com o número atual
-          e quantos existem no nível, imagem para simbolizar o seu
-          significado e font dos valores apropriada.
-
-      JavaScript (todas as funcionalidades foram implementadas):
-        Hero:
-          - Hero pode subir/descer escadas.
-          - Hero pode usar as cordas.
-          - Hero pode usar as chaminés.
-          - Hero cai com animação alternada.
-          - Hero pode partir tijolos (segundo as regras estipuladas no 
-            enunciado) acompanhado com um som de disparo.
-                - Hero parte o tijolo para o lado que está virado.
-                    - No caso que tenha acabado de sair de uma escada ou corda,
-                    dispara para o útimo lado para que estava virado.
-                - Tijolos regeneram após 4s.
-                - Hero muda de imagem consoante o lado do seu tiro.
-                - Hero é projetado um bloco para trás quando dispara (quando
-                  a sua posição o permite).
-          - Hero pode apanhar os ouros acompanhado por um som.
-          - Quando todos os ouros são apanhados as escadas finais aparecem.
-        
-        Robots:
-          - Velocidade dos robots metade da do Hero.
-          - Robots movimentam-se tentando reduzir a sua distãncia em relação
-          ao Hero.
-          - Robots podem usar escadas, cordas e chaminés.
-          - Robots podem apanhar 1 ouro de cada vez.
-                - Robots carregam o ouro durante 3 segundos, depois tentam
-                largá-lo, se não conseguirem, esperam mais 2 segundos.
-          - Robots caem nos buracos criados pelo Hero.
-                - Caem num buraco criado pelo Hero, não atravessam.
-                - Largam o ouro na casa acima deles.
-                - Regeneram 4s depois.
-                - Se tocarem no Hero, o mapa reinicia e recebemos uma mensagem
-                do site.
-
-*/
 
 let empty, hero, control, audio;
 
@@ -86,13 +48,13 @@ class Actor {
 class PassiveActor extends Actor {
   constructor(x, y, imageName) {
     super(x, y, imageName);
-    let traversable = false; //bloco atravessável
-    let climbable = false; //bloco subível (eg. escadas)
-    let grabable = false; //bloco agarrável (eg. cordas)
-    let walkable = false; //bloco andável
-    let breakable = false; //bloco destruível
-    let collectable = false; //bloco apanhável
-    let broken = false; //bloco destruído
+    let traversable = false;
+    let climbable = false;
+    let grabable = false;
+    let walkable = false;
+    let breakable = false;
+    let collectable = false;
+    let broke = false;
   }
   show() {
     control.world[this.x][this.y] = this;
@@ -121,8 +83,10 @@ class PassiveActor extends Actor {
     return this.collectable;
   }
   isBroken() {
-    return this.broken;
+    return this.broke;
   }
+
+  //teste
 }
 
 class ActiveActor extends Actor {
@@ -140,7 +104,6 @@ class ActiveActor extends Actor {
     control.world[this.x][this.y].draw(this.x, this.y);
   }
 
-  // Verifica se é possível a subida
   canGoUp() {
     let curBlock = control.getWorld(this.x, this.y);
     let blockAbove = control.getWorld(this.x, this.y - 1);
@@ -159,7 +122,6 @@ class ActiveActor extends Actor {
     return false;
   }
 
-  // Verifica se é possível a descida
   canGoDown() {
     let blockBelow = control.getWorld(this.x, this.y + 1);
     if (blockBelow != null && !control.alreadyOcupied(this.x, this.y + 1))
@@ -170,7 +132,6 @@ class ActiveActor extends Actor {
     return false;
   }
 
-  // Verifica se é possível ir para a esquerda
   canGoLeft() {
     let curBlock = control.getWorld(this.x, this.y);
     let leftBlock = control.getWorld(this.x - 1, this.y);
@@ -196,7 +157,6 @@ class ActiveActor extends Actor {
     return false;
   }
 
-  // Verifica se é possível ir para a direita
   canGoRight() {
     let curBlock = control.getWorld(this.x, this.y);
     let rightBlock = control.getWorld(this.x + 1, this.y);
@@ -222,7 +182,6 @@ class ActiveActor extends Actor {
     return false;
   }
 
-  // Função que simula a gravidade
   fall() {
     let curBlock = control.getWorld(this.x, this.y);
     let belowBlock = control.getWorld(this.x, this.y + 1);
@@ -247,7 +206,6 @@ class ActiveActor extends Actor {
       this.character == "Villain" &&
       this.y + 1 < WORLD_HEIGHT &&
       !control.alreadyOcupied(this.x, this.y + 1) &&
-      //Vilão(Robot) não se pode movimentar num bloco partido pelo Hero
       !control.getWorld(this.x, this.y).isBroken() &&
       control.getWorld(this.x, this.y + 1).isGrabable()
     ) {
@@ -263,7 +221,6 @@ class ActiveActor extends Actor {
     }
   }
 
-  // Movimenta o ator para cima
   goUp() {
     if (
       this.canGoUp(this) &&
@@ -280,7 +237,6 @@ class ActiveActor extends Actor {
     }
   }
 
-  // Movimenta o ator para baixo
   goDown() {
     if (this.canGoDown(this)) {
       if (this.y % 2 == 0) {
@@ -294,7 +250,6 @@ class ActiveActor extends Actor {
     }
   }
 
-  // Movimenta o ator para a direita
   goRight() {
     if (this.canGoRight(this)) {
       if (control.getWorld(this.x + 1, this.y).isGrabable()) {
@@ -314,7 +269,6 @@ class ActiveActor extends Actor {
     }
   }
 
-  // Movimenta o ator para a esquerda
   goLeft() {
     if (this.canGoLeft(this)) {
       if (control.getWorld(this.x - 1, this.y).isGrabable()) {
@@ -347,21 +301,21 @@ class ActiveActor extends Actor {
         switch (dx) {
           case 0:
             switch (dy) {
-              // actor goes up
+              // player goes up
               case -1:
                 this.goUp(this);
                 break;
-              // actor goes down
+              // player goes down
               case 1:
                 this.goDown(this);
                 break;
             }
             break;
-          //actor goes right
+          //player goes right
           case 1:
             this.goRight(this);
             break;
-          //actor goes left
+          //player goes left
           case -1:
             this.goLeft(this);
             break;
@@ -371,7 +325,6 @@ class ActiveActor extends Actor {
   }
 }
 
-// Pode ser destruído e andável
 class Brick extends PassiveActor {
   constructor(x, y) {
     super(x, y, "brick");
@@ -379,18 +332,25 @@ class Brick extends PassiveActor {
     this.walkable = true;
   }
   makeInvisible() {
-    // Partir o bloco
     this.hide();
     this.imageName = "empty";
     this.breakable = false;
     this.walkable = false;
     this.traversable = true;
-    this.broken = true;
+    this.broke = true;
+    this.show();
+  }
+  makeBrickVisible() {
+    this.hide();
+    this.imageName = "brick";
+    this.breakable = true;
+    this.walkable = true;
+    this.broke = false;
+    this.traversable = false;
     this.show();
   }
 }
 
-// Pode ser atravessado
 class Chimney extends PassiveActor {
   constructor(x, y) {
     super(x, y, "chimney");
@@ -398,7 +358,6 @@ class Chimney extends PassiveActor {
   }
 }
 
-// Pode ser atravessado
 class Empty extends PassiveActor {
   constructor() {
     super(-1, -1, "empty");
@@ -408,7 +367,6 @@ class Empty extends PassiveActor {
   hide() {}
 }
 
-// Pode ser atravessado e apanhado
 class Gold extends PassiveActor {
   constructor(x, y) {
     super(x, y, "gold");
@@ -423,14 +381,12 @@ class Invalid extends PassiveActor {
   }
 }
 
-// Pode ser atravessado e subido
 class Ladder extends PassiveActor {
   constructor(x, y) {
     super(x, y, "empty");
     this.traversable = true;
   }
   makeVisible() {
-    // Caso das escadas finais começam escondidas
     this.imageName = "ladder";
     this.show();
     this.climbable = true;
@@ -438,7 +394,6 @@ class Ladder extends PassiveActor {
   }
 }
 
-// Pode ser agarrável
 class Rope extends PassiveActor {
   constructor(x, y) {
     super(x, y, "rope");
@@ -446,7 +401,6 @@ class Rope extends PassiveActor {
   }
 }
 
-//Pode ser andável
 class Stone extends PassiveActor {
   constructor(x, y) {
     super(x, y, "stone");
@@ -470,7 +424,12 @@ class Hero extends ActiveActor {
     let goldCollected;
     this.goldCollected = 0;
   }
-
+  makeBVisibleL(i, j) {
+    control.getWorld(i - 1, j + 1).makeBrickVisible();
+  }
+  makeBVisibleR(i, j) {
+    control.getWorld(i + 1, j + 1).makeBrickVisible();
+  }
   shoot() {
     let shootAudio = new Audio(
       "http://www.flashkit.com/imagesvr_ce/flashkit/soundfx/Electronic/Arcade/PulseSho-Mark_E_B-8071/PulseSho-Mark_E_B-8071_hifi.mp3"
@@ -488,13 +447,7 @@ class Hero extends ActiveActor {
         this.imageName = "hero_shoots_left";
         control.getWorld(this.x - 1, this.y + 1).makeInvisible();
         shootAudio.play();
-        setTimeout(
-          GameFactory.actorFromCode,
-          5000,
-          "t",
-          this.x - 1,
-          this.y + 1
-        );
+        setTimeout(this.makeBVisibleL, 4000, this.x, this.y);
         if (
           this.canGoRight() &&
           (control.getWorld(this.x + 1, this.y + 1).isClimbable() ||
@@ -518,13 +471,7 @@ class Hero extends ActiveActor {
           this.imageName = "hero_shoots_right";
           control.getWorld(this.x + 1, this.y + 1).makeInvisible();
           shootAudio.play();
-          setTimeout(
-            GameFactory.actorFromCode,
-            5000,
-            "t",
-            this.x + 1,
-            this.y + 1
-          );
+          setTimeout(this.makeBVisibleR, 4000, this.x, this.y);
           if (
             this.canGoLeft() &&
             (control.getWorld(this.x - 1, this.y + 1).isClimbable() ||
@@ -537,7 +484,6 @@ class Hero extends ActiveActor {
     }
   }
 
-  // Conta quantos blocos apanháveis existem no mapa
   countInitialGold() {
     let amount = 0;
     for (let i = 0; i < WORLD_WIDTH; i++) {
@@ -609,7 +555,6 @@ class Robot extends ActiveActor {
     let robotRespawn = -1;
   }
 
-  // Pathfinding do Robot
   robotMovement() {
     if (hero.y > this.y) {
       if (super.canGoDown(this)) {
@@ -659,7 +604,6 @@ class Robot extends ActiveActor {
 
   animation() {
     if (this.time % 2 == 0) return;
-    // Largar ouro após algum tempo
     if (this.dropGold == this.time && this.hasGold) {
       let curBlock = control.getWorld(this.x, this.y);
       if (
@@ -668,12 +612,11 @@ class Robot extends ActiveActor {
       ) {
         GameFactory.actorFromCode("o", this.x, this.y);
         this.hasGold = false;
-      } else this.dropGold += 8; // não conseguiu largar, + 2s
+      } else this.dropGold += 8;
     }
     if (this.robotRespawn == this.time) {
       this.rearrangeRobot(this);
     }
-    // Queda num buraco do Hero
     if (
       this.x >= 0 &&
       this.x < WORLD_WIDTH &&
@@ -689,41 +632,37 @@ class Robot extends ActiveActor {
       this.robotRespawn = this.time + 32;
     }
     if (this.stop == false) {
-      super.animation(this.robotMovement(hero, this));
+      let k = this.robotMovement(hero, this);
+      super.animation(k);
       if (control.getWorld(this.x, this.y).isCollectable() && !this.hasGold) {
         control.getWorld(this.x, this.y).hide();
         this.hasGold = true;
         this.dropGold = this.time + 20;
         this.show();
       }
-      this.checkSurroudings();
+      let leftBlockActive = control.getWorldActive(this.x - 1, this.y);
+      let rightBlockActive = control.getWorldActive(this.x + 1, this.y);
+      let topBlockActive = control.getWorldActive(this.x, this.y - 1);
+      let bottomBlockActive = control.getWorldActive(this.x, this.y + 1);
+      let bottomBlock = control.getWorld(this.x, this.y + 1);
+      let topBlock = control.getWorld(this.x, this.y - 1);
+      let curBlock = control.getWorldActive(this.x, this.y);
+      if (
+        ((leftBlockActive != null && leftBlockActive.character == "Hero") ||
+          (rightBlockActive != null && rightBlockActive.character == "Hero") ||
+          (topBlockActive != null &&
+            topBlockActive.character == "Hero" &&
+            !topBlock.isGrabable()) ||
+          (bottomBlockActive != null &&
+            bottomBlockActive.character == "Hero") ||
+          curBlock.character == "Hero") &&
+        !bottomBlock.isBroken()
+      ) {
+        hero.isDead = true;
+        this.reinitialized = true;
+      }
     }
   }
-
-  // Verifica se Hero está adjacente ao Robot
-  checkSurroudings() {
-    let leftBlockActive = control.getWorldActive(this.x - 1, this.y);
-    let rightBlockActive = control.getWorldActive(this.x + 1, this.y);
-    let topBlockActive = control.getWorldActive(this.x, this.y - 1);
-    let bottomBlockActive = control.getWorldActive(this.x, this.y + 1);
-    let bottomBlock = control.getWorld(this.x, this.y + 1);
-    let topBlock = control.getWorld(this.x, this.y - 1);
-    let curBlock = control.getWorldActive(this.x, this.y);
-    if (
-      ((leftBlockActive != null && leftBlockActive.character == "Hero") ||
-        (rightBlockActive != null && rightBlockActive.character == "Hero") ||
-        (topBlockActive != null &&
-          topBlockActive.character == "Hero" &&
-          !topBlock.isGrabable()) ||
-        (bottomBlockActive != null && bottomBlockActive.character == "Hero") ||
-        curBlock.character == "Hero") &&
-      !bottomBlock.isBroken()
-    ) {
-      hero.isDead = true;
-      this.reinitialized = true;
-    }
-  }
-
   rearrangeRobot(robot) {
     robot.stop = false;
     GameFactory.actorFromCode("t", robot.x, robot.y);
@@ -859,6 +798,7 @@ class GameControl {
 
   endGameVerification() {
     if (hero.isDead) {
+      alert("Game Over! Try level " + this.level + " again!");
       this.resetMap();
       this.loadLevel(this.level);
     } else if (
