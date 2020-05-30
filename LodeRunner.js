@@ -221,9 +221,7 @@ class ActiveActor extends Actor {
     }
     return false;
   }
-
-  // Função que simula a gravidade
-  fall() {
+  isFalling() {
     let curBlock = control.getWorld(this.x, this.y);
     let belowBlock = control.getWorld(this.x, this.y + 1);
     if (
@@ -235,7 +233,14 @@ class ActiveActor extends Actor {
       !curBlock.isGrabable() &&
       !curBlock.isClimbable() &&
       !control.alreadyOcupied(this.x, this.y + 1)
-    ) {
+    )
+      return true;
+    return false;
+  }
+
+  // Função que simula a gravidade
+  fall() {
+    if (this.isFalling()) {
       if (this.y % 2 == 0)
         if (this.character == "Hero") this.imageName = "hero_falls_left";
         else this.imageName = "robot_falls_left";
@@ -588,7 +593,9 @@ class Hero extends ActiveActor {
       !this.canGoUp() &&
       !this.canGoDown() &&
       !this.canGoLeft() &&
-      !this.canGoRight()
+      !this.canGoRight() &&
+      !this.isFalling() &&
+      !control.getWorld(this.x, this.y + 1).isGrabable()
     )
       this.isDead = true;
     control.endGameVerification();
