@@ -798,6 +798,7 @@ class GameControl {
 
   endGameVerification() {
     if (hero.isDead) {
+      alert("Game Over! Try level " + this.level + " again!");
       this.resetMap();
       this.loadLevel(this.level);
     } else if (
