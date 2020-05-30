@@ -394,6 +394,7 @@ class Brick extends PassiveActor {
     this.show();
   }
   makeBrickVisible() {
+    // Regeneração do tijolo
     this.hide();
     this.imageName = "brick";
     this.breakable = true;
@@ -614,7 +615,6 @@ class Robot extends ActiveActor {
     let stop;
     this.stop = false;
     this.character = "Villain";
-    let reinitialized = false;
     let dropGold = -1;
     let robotRespawn = -1;
   }
@@ -696,6 +696,7 @@ class Robot extends ActiveActor {
       }
       this.stop = true;
       control.world[this.x][this.y] = empty;
+      // Garante que não faz respawn no nível seguinte
       this.robotRespawn = this.time + 32;
     }
     if (this.stop == false) {
@@ -730,7 +731,6 @@ class Robot extends ActiveActor {
       !bottomBlock.isBroken()
     ) {
       hero.isDead = true;
-      this.reinitialized = true;
     }
   }
 
