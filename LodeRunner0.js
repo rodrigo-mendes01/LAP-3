@@ -122,19 +122,19 @@ class GameFactory {
 
 const WORLD_WIDTH = 28;
 const WORLD_HEIGHT = 16;
-//mudar o g. para tt
+
 const MAPS = Object.freeze([
   [
     "..................E.........",
-    "....o.....o.......E.........",
-    "tptptptetttttttT..E.........",
+    "....o.............E.........",
+    "tptptptettttttt...E.........",
     ".......eccccccccccE....o....",
     ".......e....tte...tttttttett",
     ".......e....tte..........e..",
-    ".......e....tte.......oS.e..",
+    ".....r.e....tte.......or.e..",
     "ttettttt....ttttttttettttttt",
     "..e.................e.......",
-    "..e.................e.......",
+    "..e...........r.....e.......",
     "tttttttttetttttttttte.......",
     ".........e..........e.......",
     ".......o.ecccccccccce...o...",
@@ -146,12 +146,12 @@ const MAPS = Object.freeze([
     "...o.......................e",
     "epptppe...........o........e",
     "e.....e....ettttttttte.o...e",
-    "e.o.S.e....e.........ettttTe",
+    "e.o.r.e....e.........ettttTe",
     "etptpte....e.........e.....E",
-    "e.....eccccecccccc..Se.....E",
-    "e.....e....e.....e.ttppppppe",
+    "e.....eccccecccccc..re.....E",
+    "e.....e....e.....etttppppppe",
     "e.....e....e..o..e.........e",
-    "e.....e.o..ettttte.........e",
+    "e...r.e.o..ettttte.........e",
     "ptttpttpttpe.........etttett",
     "ptttp......e.........e...e..",
     "po..p......e...cccccce...e.o",
